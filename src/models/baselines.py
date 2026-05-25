@@ -24,6 +24,20 @@ class BaselineResult:
     y_pred_proba_test: np.ndarray
 
 
+def _to_dense_float(X) -> np.ndarray:
+    """Convert pandas nullable dtypes (Float64/Int64) to plain numpy float64."""
+    import pandas as pd
+
+    if isinstance(X, pd.DataFrame):
+        return X.astype("float64", errors="ignore").fillna(0.0).to_numpy(dtype=np.float64)
+    arr = np.asarray(X)
+    if arr.dtype == object:
+        arr = np.asarray(arr, dtype=np.float64)
+    if arr.dtype.kind in {"i", "u"}:
+        return arr.astype(np.float64)
+    return np.nan_to_num(arr.astype(np.float64), nan=0.0)
+
+
 def _build_feature_matrix(
     feature_set: str,
     X_struct: np.ndarray | None,
@@ -33,13 +47,13 @@ def _build_feature_matrix(
     parts = []
     if feature_set in ("structured", "structured_plus_tfidf", "structured_plus_sentiment", "all"):
         assert X_struct is not None, "X_struct required"
-        parts.append(csr_matrix(X_struct))
+        parts.append(csr_matrix(_to_dense_float(X_struct)))
     if feature_set in ("tfidf", "structured_plus_tfidf", "all"):
         assert X_tfidf is not None, "X_tfidf required"
         parts.append(X_tfidf)
     if feature_set in ("structured_plus_sentiment", "all"):
         assert X_sent is not None, "X_sent required"
-        parts.append(csr_matrix(X_sent))
+        parts.append(csr_matrix(_to_dense_float(X_sent)))
     if not parts:
         raise ValueError(f"unknown feature_set: {feature_set}")
     if len(parts) == 1:

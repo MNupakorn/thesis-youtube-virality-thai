@@ -7,7 +7,7 @@ global:
   experiment_name: thesis-virality-thai
   artifacts_dir: reports/artifacts
 
-# Baselines (run locally)
+# Baselines (run locally — fast)
 baselines:
   models:
     - name: logistic_regression
@@ -29,17 +29,21 @@ baselines:
         n_estimators: 500
         learning_rate: 0.05
         max_depth: 7
-        scale_pos_weight: auto       # set from training data
+        scale_pos_weight: auto
         random_state: 42
         tree_method: hist
   feature_sets:
-    - structured                     # channel/temporal/video + engineered title features
+    - structured
     - tfidf
     - structured_plus_tfidf
     - structured_plus_sentiment
-    - all                            # structured + tfidf + sentiment + emotion
+    - all
 
-# Transformer fine-tuning
+# Transformer fine-tuning — three encoder-only models for fair classification comparison.
+# All three are encoders -> classification head, full fine-tune (no QLoRA needed).
+# WangchanBERTa  (105M, RoBERTa, Thai SP)            : baseline, fastest
+# PhayaThaiBERT (278M, RoBERTa, Thai larger corpus)  : Thai-specific, newer, stronger
+# XLM-R-large    (560M, multilingual)                : multilingual context for code-switched Thai+English titles
 transformers:
   wangchanberta:
     pretrained_name: airesearch/wangchanberta-base-att-spm-uncased
@@ -53,86 +57,62 @@ transformers:
     warmup_ratio: 0.06
     label_smoothing: 0.0
     optimizer: adamw_torch
-    precision: fp16                  # bf16 on A100/M-series; fp16 on T4
+    precision: fp16          # fp16 on T4; bf16 on A100/M-series
     gradient_checkpointing: false
     eval_strategy: epoch
     save_total_limit: 2
     early_stopping_patience: 2
-    loss: focal                      # cross_entropy | weighted_ce | focal
+    loss: focal              # cross_entropy | weighted_ce | focal
     focal_gamma: 2.0
     seed: 42
 
-  typhoon-2.5:
-    pretrained_name: scb10x/llama3-typhoon-v2.5-8b-instruct   # placeholder; user picks size
+  phayathaibert:
+    pretrained_name: clicknext/phayathaibert
     num_labels: 2
     max_length: 96
-    batch_size: 4
-    grad_accumulation: 4
-    epochs: 3
-    learning_rate: 2e-4
+    batch_size: 16            # 278M is bigger than WangchanBERTa
+    grad_accumulation: 2      # effective batch = 32
+    epochs: 4
+    learning_rate: 1e-5
     weight_decay: 0.01
-    warmup_ratio: 0.06
-    optimizer: paged_adamw_8bit
-    precision: bf16
+    warmup_ratio: 0.1
+    optimizer: adamw_torch
+    precision: fp16
     gradient_checkpointing: true
-    peft:
-      method: lora
-      r: 16
-      lora_alpha: 32
-      lora_dropout: 0.05
-      target_modules: [q_proj, k_proj, v_proj, o_proj]
-      bias: none
-      task_type: SEQ_CLS
-    bnb:
-      load_in_4bit: true
-      bnb_4bit_compute_dtype: bfloat16
-      bnb_4bit_quant_type: nf4
-      bnb_4bit_use_double_quant: true
     eval_strategy: epoch
+    save_total_limit: 2
     early_stopping_patience: 2
     loss: focal
     focal_gamma: 2.0
     seed: 42
 
-  openthaigpt:
-    pretrained_name: openthaigpt/openthaigpt-1.5-7b-instruct  # default to 7B; switch to 72B in cloud
+  xlm-roberta-large:
+    pretrained_name: FacebookAI/xlm-roberta-large
     num_labels: 2
     max_length: 96
-    batch_size: 2
-    grad_accumulation: 8
-    epochs: 3
-    learning_rate: 2e-4
+    batch_size: 8             # 560M model on a T4 (16GB) — needs gradient checkpointing
+    grad_accumulation: 4      # effective batch = 32
+    epochs: 4
+    learning_rate: 1e-5
     weight_decay: 0.01
-    warmup_ratio: 0.06
-    optimizer: paged_adamw_8bit
-    precision: bf16
+    warmup_ratio: 0.1
+    optimizer: adamw_torch
+    precision: fp16
     gradient_checkpointing: true
-    peft:
-      method: lora
-      r: 16
-      lora_alpha: 32
-      lora_dropout: 0.05
-      target_modules: [q_proj, k_proj, v_proj, o_proj]
-      bias: none
-      task_type: SEQ_CLS
-    bnb:
-      load_in_4bit: true
-      bnb_4bit_compute_dtype: bfloat16
-      bnb_4bit_quant_type: nf4
-      bnb_4bit_use_double_quant: true
     eval_strategy: epoch
+    save_total_limit: 2
     early_stopping_patience: 2
     loss: focal
     focal_gamma: 2.0
     seed: 42
 
-# Hybrid multi-modal model (proposed)
+# Multi-modal hybrid model (proposed extension)
 hybrid:
   text_backbone: airesearch/wangchanberta-base-att-spm-uncased
-  freeze_backbone: true              # use as fixed feature extractor; only train fusion head
+  freeze_backbone: true
   pooling: cls
   fusion:
-    type: concat                     # concat | gated | attention
+    type: concat
     dropout: 0.3
     hidden_dim: 256
     num_layers: 2
@@ -146,13 +126,12 @@ hybrid:
   focal_gamma: 2.0
   early_stopping_patience: 5
   seed: 42
-  # Also train a LightGBM head on the same fused features for comparison
   also_train_gbm_head: true
 
 # Hyperparameter optimization
 hpo:
-  enabled: false                     # turn on once full pipeline is wired
+  enabled: false
   framework: optuna
   n_trials: 30
   direction: maximize
-  metric: roc_auc                    # measured on val set
+  metric: roc_auc

@@ -28,7 +28,11 @@ log = setup_logger("scripts.train_transformer")
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", required=True, choices=["wangchanberta", "typhoon-2.5", "openthaigpt"])
+    ap.add_argument(
+        "--model",
+        required=True,
+        choices=["wangchanberta", "phayathaibert", "xlm-roberta-large", "typhoon-2.5", "openthaigpt"],
+    )
     ap.add_argument("--config", default="configs/train.yaml")
     ap.add_argument("--data-config", default="configs/data.yaml")
     args = ap.parse_args()

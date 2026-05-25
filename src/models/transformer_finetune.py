@@ -285,12 +285,21 @@ def fine_tune(
     output_dir: str | Path,
     class_weight_pos: float | None = None,
 ) -> dict[str, Any]:
-    """High-level dispatcher. model_alias in {'wangchanberta','typhoon-2.5','openthaigpt'}."""
+    """High-level dispatcher.
+
+    All three encoder models (WangchanBERTa, PhayaThaiBERT, XLM-RoBERTa-large)
+    use full fine-tuning with the same Trainer wrapper — only batch size,
+    gradient checkpointing, and learning rate change between them.
+    The QLoRA path remains available for any future decoder LLM via the alias
+    'typhoon-2.5' / 'openthaigpt' (kept for reproducibility of the original
+    thesis design).
+    """
     ds = build_hf_dataset(df)
     pretrained = cfg["pretrained_name"]
     num_labels = cfg.get("num_labels", 2)
 
-    if model_alias == "wangchanberta":
+    encoder_aliases = {"wangchanberta", "phayathaibert", "xlm-roberta-large"}
+    if model_alias in encoder_aliases:
         trainer, tokenizer = _build_trainer_full_ft(
             pretrained, ds["train"], ds["val"], output_dir, num_labels, cfg, class_weight_pos
         )

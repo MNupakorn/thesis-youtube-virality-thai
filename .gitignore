@@ -10,6 +10,7 @@ data/processed/*
 models/checkpoints/
 mlruns/
 wandb/
+reports/artifacts/models/      # joblib / safetensors model dumps (large)
 *.ckpt
 *.pt
 *.bin
