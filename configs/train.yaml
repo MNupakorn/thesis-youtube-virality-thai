@@ -52,7 +52,7 @@ transformers:
     batch_size: 32
     grad_accumulation: 1
     epochs: 5
-    learning_rate: 2e-5
+    learning_rate: 2.0e-5
     weight_decay: 0.01
     warmup_ratio: 0.06
     label_smoothing: 0.0
@@ -73,7 +73,7 @@ transformers:
     batch_size: 16            # 278M is bigger than WangchanBERTa
     grad_accumulation: 2      # effective batch = 32
     epochs: 4
-    learning_rate: 1e-5
+    learning_rate: 1.0e-5
     weight_decay: 0.01
     warmup_ratio: 0.1
     optimizer: adamw_torch
@@ -93,7 +93,7 @@ transformers:
     batch_size: 8             # 560M model on a T4 (16GB) — needs gradient checkpointing
     grad_accumulation: 4      # effective batch = 32
     epochs: 4
-    learning_rate: 1e-5
+    learning_rate: 1.0e-5
     weight_decay: 0.01
     warmup_ratio: 0.1
     optimizer: adamw_torch
@@ -118,7 +118,7 @@ hybrid:
     num_layers: 2
     activation: gelu
   optimizer: adamw_torch
-  learning_rate: 1e-3
+  learning_rate: 1.0e-3
   weight_decay: 0.01
   batch_size: 128
   epochs: 30
