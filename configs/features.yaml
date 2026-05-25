@@ -1,0 +1,77 @@
+# Feature engineering configuration
+
+# Sentiment model — Thai sentiment classifier used as a feature extractor
+sentiment:
+  # State-of-the-art Thai sentiment model fine-tuned on Wisesight-3K
+  # Outputs: 4 classes (pos / neu / neg / q[uestion])  → 4-dim probability vector
+  model_name: airesearch/wangchanberta-base-att-spm-uncased
+  finetune_repo: poom-sci/WangchanBERTa-finetuned-sentiment   # fallback head
+  max_length: 128
+  batch_size: 64
+  device: auto                    # auto | mps | cuda | cpu
+  cache_dir: data/interim/sentiment_cache.parquet
+  # Optional: also compute multilingual emotion (XLM-RoBERTa fine-tuned for 7 emotions)
+  emotion:
+    enabled: true
+    model_name: cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual
+    cache_dir: data/interim/emotion_cache.parquet
+
+# Engineered title features
+title_features:
+  char_length: true
+  token_length: true             # PyThaiNLP word tokenizer
+  word_length: true
+  exclamation_count: true
+  question_count: true
+  caps_ratio: true               # for the latin portion
+  digit_count: true
+  emoji_count: true
+  hashtag_count: true
+  mention_count: true
+  has_brackets: true
+  has_number: true
+  has_code_switching: true       # has both Thai and Latin chars
+  curiosity_gap_score: true      # lexicon: สิ่งนี้/เรื่องนี้/this/this is what/...
+  hyperbolic_score: true         # ที่สุด/ดีที่สุด/ช็อกโลก/best/ultimate/...
+  emotional_intensity: true      # weighted from sentiment + lexicon
+
+# Channel / metadata features (numerical)
+channel_features:
+  log_subscriber_count: true
+  log_channel_video_count: true
+  log_channel_view_count: true  # if available
+  channel_age_days: true         # if first_published_at is known
+  is_verified: false             # not always in API response
+
+# Temporal features
+temporal_features:
+  publish_hour: true
+  publish_day_of_week: true
+  publish_is_weekend: true
+  publish_is_peak_hours: true    # 19:00–22:00 Thai time
+  publish_month: true
+
+# Video features
+video_features:
+  duration_sec: true
+  log_duration_sec: true
+  is_short: true                 # duration <= 60s
+  category_id_onehot: true
+
+# TF-IDF features (for baseline ML)
+tfidf:
+  enabled: true
+  max_features: 20000
+  ngram_range: [1, 2]
+  min_df: 5
+  tokenizer: pythainlp           # pythainlp | char
+  sublinear_tf: true
+
+# Transformer-derived feature (CLS embedding for hybrid model)
+transformer_embedding:
+  enabled: true
+  model_name: airesearch/wangchanberta-base-att-spm-uncased
+  pooling: cls                   # cls | mean
+  layer: last
+  max_length: 64
+  cache_dir: data/interim/title_embeddings.npy

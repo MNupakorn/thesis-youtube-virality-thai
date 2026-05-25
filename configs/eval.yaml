@@ -1,0 +1,69 @@
+# Evaluation configuration
+
+# Where to find trained models / predictions
+predictions_dir: reports/artifacts/predictions
+metrics_dir: reports/tables
+figures_dir: reports/figures
+
+# Metrics to compute
+metrics:
+  - accuracy
+  - precision_macro
+  - precision_pos
+  - recall_macro
+  - recall_pos
+  - f1_macro
+  - f1_pos
+  - roc_auc
+  - pr_auc
+  - mcc
+  - confusion_matrix
+
+# Bootstrap CIs
+bootstrap:
+  enabled: true
+  n_iter: 1000
+  alpha: 0.05
+  seed: 42
+
+# Calibration
+calibration:
+  enabled: true
+  methods: [platt, isotonic]
+  fit_on: val
+  evaluate_on: test
+  bins: 15
+
+# Statistical model comparison
+stats_tests:
+  mcnemars:
+    enabled: true
+    correction: continuity
+  cochrans_q:
+    enabled: true
+    apply_when_n_models_ge: 3
+  paired_bootstrap_diff:
+    enabled: true
+    n_iter: 1000
+
+# Explainability
+explainability:
+  shap:
+    enabled: true
+    on_model: lightgbm_on_hybrid_features
+    max_samples: 2000
+  lime:
+    enabled: true
+    on_model: wangchanberta
+    n_samples_to_explain: 30
+  attention:
+    enabled: true
+    on_model: wangchanberta
+    n_samples_to_visualize: 20
+
+# Robustness slices
+slices:
+  - by_category_id
+  - by_channel_subscriber_bucket    # 0–10k / 10k–100k / 100k–1M / 1M+
+  - by_title_length_bucket
+  - by_duration_bucket              # short / mid / long

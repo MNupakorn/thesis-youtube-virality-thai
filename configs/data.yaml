@@ -1,0 +1,64 @@
+# Data configuration
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  reports_dir: reports
+
+# Raw dataset filename (parquet preferred to avoid encoding issues)
+raw_filename: youtube_thai_videos.parquet
+
+# Schema (expected columns from YouTube Data API v3 collector)
+required_columns:
+  - video_id
+  - title
+  - description
+  - tags
+  - category_id
+  - category_title
+  - published_at
+  - duration            # ISO 8601, e.g. PT3M42S
+  - channel_id
+  - channel_title
+  - subscriber_count
+  - channel_video_count
+  - view_count
+  - like_count
+  - comment_count
+
+# Cleaning rules
+clean:
+  min_title_length_chars: 1
+  drop_duplicate_video_ids: true
+  require_min_views: 0
+  drop_if_disabled_engagement: true   # if like/comment counts are NaN we still keep, only drop if everything is NaN
+
+# Label engineering — ViralityIndex
+labels:
+  # log-transform views before z-scoring (per-channel)
+  log_transform_views: true
+  # engagement_rate = (likes + comments) / max(views, 1)
+  engagement_rate_formula: "(like_count + comment_count) / max(view_count, 1)"
+  # ViralityIndex = z(log_views_per_channel) + z(engagement_rate_per_channel)
+  z_score_scope: per_channel        # per_channel | global
+  # Binary label: 1 if ViralityIndex >= channel's 90th percentile
+  threshold_percentile: 90
+  # Optional secondary global label for ablation
+  also_compute_global_label: true
+
+# Splits
+splits:
+  scheme: hybrid_group_time        # group_only | time_only | hybrid_group_time
+  # In hybrid_group_time: group split by channel for train/val, then take latest 15% by published_at as test
+  train_pct: 0.70
+  val_pct: 0.15
+  test_pct: 0.15
+  seed: 42
+  stratify_on: virality            # ensure class balance preserved across splits
+
+# Imbalance handling — applied to TRAIN ONLY
+imbalance:
+  strategy: class_weight_plus_undersample   # class_weight | undersample | smote | class_weight_plus_undersample | none
+  undersample_ratio: 3.0           # keep majority:minority at most 3:1
+  random_state: 42
