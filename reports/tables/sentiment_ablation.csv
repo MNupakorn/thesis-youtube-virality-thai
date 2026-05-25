@@ -1,0 +1,4 @@
+feature_set,roc_auc,roc_auc_ci_lo,roc_auc_ci_hi,f1_pos,recall_pos,n_features
+structured,0.6527,0.6253,0.6839,0.2168,0.6364,27
+structured_plus_sentiment,0.6504,0.6221,0.6779,0.2295,0.5714,33
+sentiment_only,0.4985,0.4633,0.5354,0.1581,0.8182,6
