@@ -9,6 +9,20 @@ paths:
 # Raw dataset filename (parquet preferred to avoid encoding issues)
 raw_filename: youtube_thai_videos.parquet
 
+# Collection — used by scripts/collect_data.py + src/data_collection/collect_videos
+collection:
+  region: TH
+  # 14 categories (same as the thesis: Film&Animation, Autos, Music, Pets, Sports,
+  # Travel, Gaming, People, Comedy, Entertainment, News, Howto, Education, Science)
+  max_channels_per_category: 50           # 14 cats * 50 = up to 700 candidate channels
+  published_after: "2024-01-01T00:00:00Z"  # 2 yr window aligns with thesis (25 months)
+  published_before: "2026-01-01T00:00:00Z"
+  max_videos_per_channel: 500
+  # Quota note: each playlistItems.list call = 1 unit, videos.list = 1 unit/50 IDs.
+  # Discovery + listing for ~700 channels costs roughly 5–15k units; full video meta
+  # for ~100k videos costs another ~2k units. Free quota is 10k/day per project.
+  # If you hit the cap, the script can be re-run later to resume (it dedupes by video_id).
+
 # Schema (expected columns from YouTube Data API v3 collector)
 required_columns:
   - video_id
