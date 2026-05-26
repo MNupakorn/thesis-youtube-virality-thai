@@ -1,0 +1,386 @@
+% chapters/02-literature-review.tex
+\chapter{การทบทวนวรรณกรรม}
+\label{ch:litreview}
+
+บทนี้ทบทวนวรรณกรรมที่เกี่ยวข้องใน 7 มิติหลัก ได้แก่ (1) นิยามและการพยากรณ์
+ความนิยมของเนื้อหาบนสื่อออนไลน์ (2) คุณลักษณะของวิดีโอที่ส่งผลต่อความไวรัล
+(3) สถาปัตยกรรมทรานส์ฟอร์เมอร์ (4) แบบจำลองภาษาไทยที่ใช้ในงานวิจัย
+(5) การจัดการความไม่สมดุลของชั้น (6) การปรับเทียบความน่าจะเป็น และ
+(7) ความสามารถในการอธิบายของแบบจำลอง
+
+\section{การพยากรณ์ความนิยมของเนื้อหาบนสื่อออนไลน์}
+\label{sec:lit-virality}
+
+\subsection{นิยามและการวัดความไวรัล}
+
+แนวคิดเรื่อง ``ความไวรัล'' ของเนื้อหาออนไลน์เริ่มต้นจาก Gladwell
+\cite{gladwell2000tipping} ซึ่งใช้คำนี้ในบริบทของจุดเปลี่ยน (tipping point)
+ของการแพร่กระจายทางสังคม Berger \& Milkman \cite{berger2012makes} วิเคราะห์
+บทความข่าวกว่า 7{,}000 ชิ้นจาก The New York Times พบว่าเนื้อหาที่กระตุ้น
+\emph{อารมณ์ตื่นเต้น} (high-arousal emotion) ไม่ว่าจะเชิงบวกหรือเชิงลบมีโอกาส
+ถูกแชร์สูงกว่า งานนี้ได้สถาปนาความเชื่อมโยงระหว่างคุณลักษณะของข้อความและ
+การแพร่กระจาย ในงานพยากรณ์ Cheng et~al.\ \cite{cheng2014can} ระบุว่าการพยากรณ์
+ความสำเร็จของเนื้อหา \emph{ก่อน} เผยแพร่ทำได้ยากกว่าการพยากรณ์ \emph{หลัง}
+เผยแพร่อย่างมีนัยสำคัญ เพราะสัญญาณการแพร่กระจายในระยะแรกหายไป
+
+นิยามเชิงปริมาณของความไวรัลที่ใช้กันอย่างแพร่หลายแบ่งได้เป็น 2 แนวคือ
+(ก) \emph{เกณฑ์เชิงสัมบูรณ์} เช่น Trzcinski \& Rokita \cite{trzcinski2017popularity}
+ตัดที่ 1 ล้านยอดเข้าชม และ (ข) \emph{เกณฑ์เชิงสัมพัทธ์} เช่น Khosla et~al.\
+\cite{khosla2014popularity} ใช้ z-score ภายในผู้สร้างเนื้อหา การศึกษานี้เลือก
+แนวทาง (ข) เพราะเกณฑ์สัมบูรณ์ทำให้ช่องขนาดใหญ่กลายเป็นชั้นบวกทั้งหมด ซึ่งทำลาย
+ความแยกแยะของแบบจำลอง
+
+\subsection{งานพยากรณ์ความนิยมบน YouTube และแพลตฟอร์มอื่น}
+
+\textbf{Pinto et~al.\ \cite{pinto2013using}} เสนอแบบจำลอง Multivariate Linear
+และ Multi-Scale Series สำหรับพยากรณ์ยอดเข้าชม YouTube โดยอาศัยพฤติกรรมการ
+รับชมในช่วง 30 วันแรก งานนี้บุกเบิกแนวคิด \emph{early-stage prediction} ที่
+ยังคงเป็นพื้นฐานสำคัญแต่ \emph{ต้องการ} ข้อมูลหลังเผยแพร่
+
+\textbf{Hoiles et~al.\ \cite{hoiles2017engagement}} ศึกษาว่าฟีเจอร์ใดบนวิดีโอ
+YouTube ส่งผลต่อการมีส่วนร่วม โดยใช้ Random Forest บน meta-data รวมกับฟีเจอร์
+ของช่อง สรุปว่าจำนวนผู้ติดตามและความถี่ในการอัปโหลดเป็นปัจจัยที่สำคัญที่สุด
+สอดคล้องกับการค้นพบของงานปัจจุบันที่ฟีเจอร์ \texttt{channel\_subscribers}
+และ \texttt{channel\_upload\_frequency} ติดอันดับสูงใน SHAP
+
+\textbf{Trzcinski \& Rokita \cite{trzcinski2017popularity}} ใช้คุณลักษณะภาพและ
+ข้อมูลโครงสร้างของวิดีโอ Facebook บน Support Vector Regression รายงาน
+$R^2 = 0.65$ ใน 24 ชั่วโมงแรก งานนี้ไม่ได้ใช้ข้อมูลข้อความเชิงลึก
+
+\textbf{Lee et~al.\ \cite{lee2010approach}} ใช้ Naïve Bayes บนคำสำคัญของชื่อ
+วิดีโอ YouTube พบว่าคำที่กระตุ้นอารมณ์มีน้ำหนักสูงในการพยากรณ์ความนิยม
+
+\textbf{Cheng et~al.\ \cite{cheng2014can}} วิเคราะห์การ ``cascade'' ของรูปภาพ
+บน Facebook เน้นว่าการพยากรณ์ในขั้นแรก ๆ มีข้อจำกัดเชิงข้อมูลและความสุ่ม
+สูง รูปแบบเดียวกันถูกสังเกตในข้อมูลภาษาอื่น ๆ รวมถึงเอเชียตะวันออกเฉียงใต้
+เมื่อนำเทคนิคเดียวกันไปประยุกต์
+
+ในบริบทภาษาไทย งานที่ใกล้ที่สุดคือชุดวิเคราะห์ engagement บนสื่อสังคมไทย
+ที่อาศัย hand-crafted features ผสมกับ classical ML เช่น Random Forest และ
+Gradient Boosting แต่ยังไม่มีงานที่ใช้แบบจำลองทรานส์ฟอร์เมอร์ภาษาไทย
+หลายตัวเปรียบเทียบกันบนปัญหา virality classification พร้อมการทดสอบทาง
+สถิติที่เข้มงวด งานวิจัยปัจจุบันจึงเข้าไปอุดช่องว่างเชิงระเบียบวิธี
+ดังกล่าว และเป็นการศึกษาแรก (ตามที่คณะผู้วิจัยทราบ) ที่รายงาน McNemar
+pairwise + Cochran's Q ระหว่าง Thai encoders บนชุดทดสอบเดียวกัน
+
+\section{คุณลักษณะของวิดีโอที่ส่งผลต่อความไวรัล}
+\label{sec:lit-features}
+
+\subsection{ฟีเจอร์เชิงข้อความ}
+
+ชื่อวิดีโอเป็นจุดสัมผัสแรก (first impression) ของผู้ชม
+Potthast et~al.\ \cite{potthast2018clickbait} เสนอเครื่องมือ
+ตรวจจับคลิกเบตที่ใช้สถาปัตยกรรม LSTM และ Transformer พบว่าฟีเจอร์ความยาว
+ชื่อเรื่อง สัดส่วนอักษรพิมพ์ใหญ่ และการมีเครื่องหมายอัศเจรีย์เป็นตัวทำนายที่
+สำคัญ ในงานปัจจุบันก็ยืนยันการค้นพบนี้บนข้อมูลภาษาไทย: ฟีเจอร์ \texttt{t\_emoji\_n},
+\texttt{t\_question\_n}, \texttt{t\_caps\_ratio} มีอิทธิพลบน LightGBM-best
+และปรากฏใน top-50 รายการ SHAP (ดูภาคผนวก \ref{app:tables})
+
+สำหรับภาษาไทย Phatthiyaphaibun et~al.\ \cite{phatthiyaphaibun2016thainlp}
+จัดทำ PyThaiNLP toolkit ที่รวมการตัดคำด้วย \texttt{newmm} ซึ่งเป็นพื้นฐาน
+ของการสกัดฟีเจอร์ลำดับคำในงานนี้
+
+\subsection{ฟีเจอร์เชิงอารมณ์}
+
+Suriyawongkul et~al.\ \cite{suriyawongkul2019wisesight} เสนอชุดข้อมูล
+Wisesight-Sentiment ที่จัดทำขึ้นเพื่อการวิเคราะห์ความรู้สึกภาษาไทย แบ่งเป็น
+4 ระดับ (positive / neutral / negative / question) งานวิจัยจำนวนมากใช้ชุดข้อมูล
+นี้ฝึกตัวจำแนกความรู้สึกระดับประโยค \cite{lowphansirikul2021wangchanberta}
+ในงานปัจจุบัน เราใช้ \texttt{wangchanberta-base-att-spm-uncased} ที่ปรับจูนบน
+Wisesight-Sentiment แล้ว เพื่อสกัดฟีเจอร์อารมณ์ของชื่อวิดีโอ จากนั้นนำเข้า
+เป็น 6 มิติของแบบจำลองคลาสสิก
+
+\subsection{ฟีเจอร์เชิงโครงสร้าง (Channel and Temporal Features)}
+
+ขนาดของช่องและความถี่ในการอัปโหลดเป็นตัวแปรที่ Hoiles et~al.\
+\cite{hoiles2017engagement} และ Borghol et~al.\ \cite{borghol2012untold}
+ยืนยันว่ามีผลสำคัญ Borghol et~al.\ ค้นพบว่าหลักการ ``the rich get richer''
+ทำงานบน YouTube ในแง่ที่ว่าวิดีโอที่มีช่องขนาดใหญ่และมีฐานผู้ติดตามได้รับ
+yt-discovery bonus ส่งผลให้มีโอกาสไวรัลสูงกว่าเชิงสถิติ
+
+ฟีเจอร์เชิงเวลา (เช่น เวลาที่เผยแพร่ในรอบสัปดาห์ ฤดูกาล วันเทศกาล) ก็มีผลตาม
+Wu et~al.\ \cite{wu2016unfolding} ที่วิเคราะห์การมีส่วนร่วมตามเวลาเผยแพร่บน
+Twitter
+
+\section{แบบจำลองทรานส์ฟอร์เมอร์}
+\label{sec:lit-transformer}
+
+\subsection{สถาปัตยกรรม Transformer}
+
+\textbf{Vaswani et~al.\ \cite{vaswani2017attention}} เสนอแบบจำลอง Transformer
+ในปี ค.ศ.\ 2017 ซึ่งทดแทน RNN และ LSTM ในการประมวลผลลำดับด้วย
+\emph{Self-Attention Mechanism} หัวใจของสถาปัตยกรรมคือฟังก์ชัน Scaled
+Dot-Product Attention:
+\begin{equation}
+\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}}\right) V
+\label{eq:attention}
+\end{equation}
+โดย $Q, K, V$ คือ Query, Key, Value matrices และ $d_k$ คือมิติของ key
+สถาปัตยกรรมเต็มของ Transformer ใช้ \emph{Multi-Head Attention} ที่รันหลาย
+attention heads ขนานกัน และใช้ \emph{Positional Encoding} เพื่อแทนตำแหน่ง
+ของแต่ละ token ในลำดับ ความสามารถจัดการความสัมพันธ์ระยะไกลใน $O(n^2)$ ของ
+Self-Attention เป็นจุดแข็งหลัก แม้จะตามมาด้วยข้อจำกัดเรื่องความซับซ้อนเมื่อ
+ลำดับยาวมาก
+
+\subsection{BERT และ RoBERTa}
+
+\textbf{Devlin et~al.\ \cite{devlin2019bert}} เสนอ BERT (Bidirectional
+Encoder Representations from Transformers) ในปี ค.ศ.\ 2019 BERT ใช้
+สถาปัตยกรรม Transformer-encoder อย่างเดียว ฝึกล่วงหน้าด้วยภาระงาน 2 แบบคือ
+\emph{Masked Language Modelling} (MLM) ซึ่งสุ่มซ่อน token แล้วฝึกแบบจำลอง
+ให้พยากรณ์ token นั้น และ \emph{Next Sentence Prediction} (NSP) เพื่อเรียนรู้
+ความสัมพันธ์ระหว่างประโยค จุดแข็งของ BERT คือ \emph{สองทิศทาง}
+(bidirectional) ในการเข้ารหัสบริบท ตรงกันข้ามกับ GPT ที่เป็น unidirectional
+left-to-right
+
+\textbf{Liu et~al.\ \cite{liu2019roberta}} พัฒนา RoBERTa (Robustly Optimised
+BERT Pretraining Approach) ในปี ค.ศ.\ 2019 ซึ่งปรับขั้นตอนการฝึกล่วงหน้าของ
+BERT ใน 4 ประเด็นหลัก คือ (1) ฝึกบนคลังข้อมูลที่ใหญ่กว่า 10 เท่า (2) ฝึกด้วย
+batch ที่ใหญ่กว่า (3) ใช้ dynamic masking และ (4) ยกเลิก NSP ผลคือ RoBERTa
+ทำงานได้ดีกว่า BERT ในเกือบทุก benchmark แบบจำลองทั้ง 3 ตัวที่เปรียบเทียบใน
+งานนี้ใช้สถาปัตยกรรม RoBERTa
+
+\subsection{แบบจำลองทรานส์ฟอร์เมอร์ภาษาไทย}
+\label{sec:lit-thai-tx}
+
+\textbf{WangchanBERTa.} \cite{lowphansirikul2021wangchanberta} เป็น RoBERTa
+ที่ฝึกล่วงหน้าโดย AIResearch.in.th (สังกัด VISTEC) บนคลังข้อมูลภาษาไทยขนาด
+78.5 GB ครอบคลุม Twitter, Wikipedia, ข่าวออนไลน์ และกฎหมาย มีพารามิเตอร์
+105M ใช้ตัวตัดคำ SentencePiece ขนาดคำศัพท์ 25{,}000 token แบบจำลองนี้เป็นที่
+รู้จักในชื่อ \texttt{airesearch/wangchanberta-base-att-spm-uncased} และ
+ได้กลายเป็นพื้นฐาน (baseline) มาตรฐานของงาน NLP ภาษาไทย
+
+\textbf{PhayaThaiBERT.} \cite{phayathaibert2023} เป็นแบบจำลองภาษาไทยที่ใหญ่กว่า
+พัฒนาโดยทีม CLICKNEXT ฝึกบนคลังข้อมูล 312 GB ขนาดพารามิเตอร์ 278M ใช้ตัวตัด
+คำ SentencePiece เช่นกันแต่มีขนาดคำศัพท์ 250{,}000 token ซึ่งครอบคลุมคำเฉพาะ
+ทางและคำใหม่ในภาษาไทยปัจจุบันได้ดีกว่า งานวิจัยภาษาไทยรายงานว่า PhayaThaiBERT
+ทำงานได้ดีกว่า WangchanBERTa บนงาน sentiment, NER และ Thai understanding
+benchmarks
+
+\textbf{XLM-RoBERTa-large.} \cite{conneau2020xlmr} เป็น RoBERTa ที่ฝึกแบบ
+มัลติลิงกัวลบนคลังข้อมูล 100 ภาษา รวม 2.5 TB จาก CommonCrawl มีพารามิเตอร์
+560M ใช้ SentencePiece ขนาดคำศัพท์ 250{,}000 token ครอบคลุมภาษาไทย ภาษา
+อังกฤษ และภาษาในกลุ่มประเทศอาเซียน สถาปัตยกรรมรองรับการสลับภาษาในเอกสาร
+เดียวกัน ในทฤษฎี XLM-R-large ควรได้เปรียบบน YouTube ภาษาไทยที่มักปะปนกับ
+อังกฤษ แต่ผลการทดลองของงานนี้กลับขัดกับสมมติฐาน
+
+\subsection{การปรับจูน (Fine-tuning) แบบเต็มเทียบกับ Parameter-Efficient}
+
+\textbf{Howard \& Ruder \cite{howard2018ulmfit}} แสดงให้เห็นว่าการปรับจูนแบบ
+จำลองภาษาที่ผ่านการฝึกล่วงหน้าให้ดีกว่าการฝึกใหม่จากศูนย์ โดยเฉพาะเมื่อข้อมูล
+มีจำกัด การปรับจูนแบบเต็ม (full fine-tuning) ปรับน้ำหนักทั้งหมดของแบบจำลอง
+ซึ่งทำงานได้ดีที่สุดเมื่อทรัพยากรเพียงพอ ในงานนี้เราใช้ full FT เพราะข้อมูล
+และ GPU มีเพียงพอ
+
+ทางเลือกอื่น ๆ คือ \emph{Parameter-Efficient Fine-Tuning} (PEFT) เช่น
+LoRA \cite{hu2022lora} และ QLoRA \cite{dettmers2023qlora} ซึ่งฝึกเฉพาะ
+adapter ขนาดเล็ก ลดความต้องการ VRAM ลงได้มาก เหมาะกับแบบจำลองขนาดใหญ่ในระดับ
+หลาย B พารามิเตอร์ รหัสฐานของงานนี้รองรับ QLoRA สำหรับ decoder LLM ผ่าน
+\texttt{src/models/transformer\_finetune.py:\_build\_trainer\_qlora()} แต่ไม่ได้
+ใช้ในการเปรียบเทียบหลัก
+
+\section{แบบจำลองพื้นฐานเชิงคลาสสิกและการเรียนรู้เชิงผสม}
+\label{sec:lit-classical}
+
+\subsection{Logistic Regression, LightGBM, XGBoost}
+
+\textbf{Logistic Regression} เป็นเส้นฐานสากลสำหรับการจำแนกประเภททวิภาค
+\textbf{XGBoost} \cite{chen2016xgboost} และ \textbf{LightGBM}
+\cite{ke2017lightgbm} เป็น Gradient Boosting Decision Tree ที่ปรับให้รวดเร็ว
+และจัดการกับข้อมูลขนาดใหญ่ได้ดี LightGBM ใช้ leaf-wise tree growth และ
+histogram-based split finding ซึ่งเร็วกว่า XGBoost ในกรณีส่วนใหญ่ ในงาน
+benchmark Kaggle, LightGBM และ XGBoost มักจะอยู่ใน top-3 ของแบบจำลองที่ใช้
+บนข้อมูล tabular
+
+\subsection{TF-IDF กับการจำแนกข้อความ}
+
+\textbf{Sparck Jones \cite{sparckjones1972tfidf}} เสนอ Inverse Document
+Frequency (IDF) ในปี ค.ศ.\ 1972 ซึ่งกลายเป็นพื้นฐานของ TF-IDF การใช้
+character-level n-gram TF-IDF กับภาษาไทย ที่ไม่มีการเว้นวรรค แสดงให้เห็นว่า
+ทำงานได้ดีกว่า word-level เนื่องจากปัญหา OOV (out-of-vocabulary) และความ
+ไม่แน่นอนของขอบเขตคำ
+
+\subsection{แบบจำลองไฮบริด (Hybrid Models)}
+
+แบบจำลองไฮบริดเป็นวิธีการรวมข้อมูลหลายโมดาลิตี (text + structured) ที่ได้รับ
+ความนิยมในงาน Kaggle เช่น KDD Cup 2014 และในอุตสาหกรรม Cheng et~al.\
+\cite{cheng2016widedeep} เสนอ Wide \& Deep โดย Google ที่รวม linear features
+กับ embeddings เข้าด้วยกัน งานปัจจุบันใช้แนวคิดเดียวกัน แต่แทน wide ด้วย
+LightGBM head และแทน deep ด้วย MLP บน title embeddings จาก SBERT
+
+\subsection{Stacking Ensemble}
+
+\textbf{Wolpert \cite{wolpert1992stacked}} เสนอแนวคิด stacking generalisation
+ในปี ค.ศ.\ 1992 ซึ่งใช้ \emph{meta-learner} เรียนรู้วิธีรวมผลพยากรณ์ของแบบ
+จำลองฐานหลายตัว Breiman \cite{breiman1996stacked} ขยายและพิสูจน์ว่า stacking
+ได้ลด generalisation error ลงตามทฤษฎี การประยุกต์ใช้ stacking ที่ประสบความ
+สำเร็จมีมากในการประกวด Kaggle เช่น Netflix Prize Bell \& Koren
+\cite{bell2007lessons} รายงานว่าการประกอบหลายแบบจำลองช่วยเพิ่มประสิทธิภาพ
+อย่างมีนัยสำคัญ ในงานปัจจุบันเราใช้ Logistic Regression เป็น meta-learner
+เพราะตีความได้ง่ายและไม่ overfit ง่ายเมื่อแบบจำลองฐานเป็นความน่าจะเป็นที่
+ปรับเทียบมาแล้ว
+
+\section{การจัดการความไม่สมดุลของชั้น}
+\label{sec:lit-imbalance}
+
+ในปัญหาปัจจุบันอัตราชั้นบวกอยู่ที่ 10.16\% ซึ่งถือว่ามีความไม่สมดุลปานกลาง
+(moderate imbalance) วิธีแก้ไขที่ใช้กันทั่วไปแบ่งเป็น 3 กลุ่ม
+
+\subsection{การปรับสมดุลของข้อมูล (Resampling)}
+
+\textbf{Undersampling} ลดจำนวนตัวอย่างชั้นมาก (negative) ลงให้สมดุลกับชั้นน้อย
+(positive) จุดอ่อนคือสูญเสียข้อมูลส่วนหนึ่ง \textbf{Oversampling} เช่น SMOTE
+\cite{chawla2002smote} สร้างตัวอย่างชั้นน้อยเพิ่มเติมโดยสังเคราะห์ระหว่าง
+เพื่อนบ้าน $k$-NN จุดอ่อนคือใน feature space ที่มีมิติสูงและกระจัดกระจาย
+SMOTE อาจสร้างข้อมูลที่ไม่สมจริง He \& Garcia \cite{he2009learning} สรุปว่า
+สำหรับ NLP บนข้อความสั้น undersampling มักเป็นทางเลือกที่ปลอดภัยกว่า
+
+\subsection{การถ่วงน้ำหนัก (Class Weighting) และ Focal Loss}
+
+วิธีถ่วงน้ำหนักให้กับชั้นน้อยใน cross-entropy loss เป็นวิธีที่ตรงไปตรงมา
+\textbf{Focal Loss} \cite{lin2017focal} ถูกเสนอเพื่อให้แบบจำลองเน้นตัวอย่างที่
+จำแนกได้ยาก โดยใส่แฟกเตอร์ $(1-p_t)^\gamma$ เข้าไปลดน้ำหนักของตัวอย่างที่
+จำแนกได้ง่าย ในงานวิจัยปัจจุบันการทดลองเบื้องต้นบน WangchanBERTa พบว่า Focal
+Loss ($\gamma=2$) ไม่ได้ให้ผลดีกว่า cross-entropy แบบธรรมดาที่รวมกับ
+undersampling
+
+\subsection{การปรับเปลี่ยน Decision Threshold}
+
+นอกจากปรับ training-side ยังสามารถปรับ inference-side ด้วยการเลื่อน
+threshold การจำแนกออกจาก 0.5 ไปยังจุดที่ optimal สำหรับ F1 ของชั้นบวก
+(He et~al.\ \cite{he2008imbalanced}) ในงานวิจัยปัจจุบันเราใช้แนวทางนี้:
+threshold ถูกเลือกจาก validation fold ด้วย scan ละเอียด แล้วใช้เป็น final
+inference threshold
+
+\section{การปรับเทียบความน่าจะเป็น}
+\label{sec:lit-calibration}
+
+\subsection{Platt Scaling}
+
+\textbf{Platt \cite{platt1999platt}} เสนอ Platt scaling ในปี ค.ศ.\ 1999
+เพื่อปรับเทียบคะแนน decision function ของ SVM ให้กลายเป็นความน่าจะเป็น
+หลักการคือฝึก Logistic Regression ตัวที่สองบน score ที่ได้
+\begin{equation}
+P(y=1\mid s) = \frac{1}{1 + \exp(As + B)}
+\label{eq:platt}
+\end{equation}
+โดย $s$ คือคะแนนพยากรณ์ ตัวแปร $A, B$ ปรับด้วย MLE บน validation fold
+Platt scaling เหมาะกับการบิดของ sigmoid ที่อาจเกิดจาก SVM และโครงข่าย
+ประสาทเทียม
+
+\subsection{Isotonic Regression}
+
+\textbf{Zadrozny \& Elkan \cite{zadrozny2002isotonic}} เสนอ isotonic regression
+ในงาน calibration ซึ่งเป็น non-parametric piecewise constant monotone
+mapping ข้อดีคือยืดหยุ่นกว่า Platt และไม่จำกัดให้อยู่ในรูป sigmoid ข้อเสียคือ
+ต้องการข้อมูล validation เยอะกว่าและ overfit ง่ายเมื่อข้อมูลน้อย
+
+\subsection{การวัดคุณภาพการปรับเทียบ}
+
+Niculescu-Mizil \& Caruana \cite{niculescu2005predicting} เปรียบเทียบ
+calibration ของแบบจำลองต่าง ๆ พบว่า boosted trees มักให้ความน่าจะเป็นที่
+\emph{เอียง} ไปทาง 0.5 ส่วน RF และ NB เอียงไปทาง 0 หรือ 1 \emph{Expected
+Calibration Error} (ECE) \cite{naeini2015obtaining} เป็นตัววัดมาตรฐาน:
+\begin{equation}
+\mathrm{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{n}\,\bigl|\mathrm{acc}(B_m) - \mathrm{conf}(B_m)\bigr|
+\label{eq:ece}
+\end{equation}
+โดยแบ่งข้อมูลเป็น $M$ bins ตาม confidence แล้ววัดส่วนต่างของความแม่นยำกับ
+ความมั่นใจในแต่ละ bin งานวิจัยปัจจุบันรายงาน ECE ของแบบจำลองที่ดีที่สุด
+หลังการปรับเทียบที่ 0.016 ซึ่งถือว่าดีมาก
+
+\section{การทดสอบความแตกต่างทางสถิติของแบบจำลอง}
+\label{sec:lit-stats}
+
+\subsection{McNemar's Test}
+
+\textbf{McNemar \cite{mcnemar1947}} เสนอการทดสอบ paired binary outcomes
+ในปี ค.ศ.\ 1947 ในการเปรียบเทียบ 2 แบบจำลองบนชุดทดสอบเดียวกัน เราสร้างตาราง
+$2\times 2$:
+\begin{center}
+\begin{tabular}{l|cc}
+ & B ถูก & B ผิด \\\hline
+A ถูก & $n_{00}$ & $n_{01}$ \\
+A ผิด & $n_{10}$ & $n_{11}$
+\end{tabular}
+\end{center}
+สถิติของ McNemar คือ
+\begin{equation}
+\chi^2_{\mathrm{McNemar}} = \frac{(n_{01} - n_{10})^2}{n_{01} + n_{10}}
+\label{eq:mcnemar}
+\end{equation}
+ภายใต้ $H_0$: แบบจำลอง 2 ตัวมีอัตราความผิดพลาดเท่ากัน สถิติเข้าใกล้ $\chi^2_1$
+Dietterich \cite{dietterich1998approximate} แนะนำการทดสอบนี้สำหรับการเปรียบเทียบ
+2 ตัวจำแนก
+
+\subsection{Cochran's Q Test}
+
+\textbf{Cochran \cite{cochran1950}} ขยาย McNemar ไปยังการเปรียบเทียบ $k > 2$
+ตัวจำแนก สถิติคือ
+\begin{equation}
+Q = \frac{(k-1)\,\left[k \sum_{j=1}^{k} C_j^2 - T^2\right]}{kT - \sum_{i=1}^{n} R_i^2}
+\label{eq:cochranq}
+\end{equation}
+โดย $C_j$ คือผลรวมความถูกของตัวจำแนก $j$ ทุกตัวอย่าง $R_i$ คือผลรวมความถูก
+ของตัวอย่าง $i$ ข้ามตัวจำแนก และ $T$ คือผลรวมทั้งหมด ภายใต้ $H_0$ สถิติเข้า
+ใกล้ $\chi^2_{k-1}$ งานวิจัยปัจจุบันใช้ Cochran's Q กับทั้ง 22 แบบจำลองและ
+กับสามทรานส์ฟอร์เมอร์ตามเงื่อนไขแยก
+
+\subsection{Bootstrap Confidence Intervals}
+
+Efron \cite{efron1979bootstrap} เสนอ Bootstrap resampling สำหรับประมาณการ
+sampling distribution โดยไม่ต้องสมมติฐาน parametric งานวิจัยปัจจุบันใช้
+1{,}000-sample bootstrap แบบ stratified โดย resample บนชุดทดสอบเพื่อสร้างช่วง
+ความเชื่อมั่น 95\% ของ ROC-AUC วิธี percentile
+
+\section{ความสามารถในการอธิบายของแบบจำลอง}
+\label{sec:lit-xai}
+
+\subsection{SHAP}
+
+\textbf{Lundberg \& Lee \cite{lundberg2017shap}} เสนอ SHAP (SHapley Additive
+exPlanations) ในปี ค.ศ.\ 2017 ซึ่งใช้ Shapley value จากทฤษฎีเกมเพื่อกระจาย
+แรงโน้มน้าวของแต่ละฟีเจอร์ต่อพยากรณ์ของแบบจำลอง คุณสมบัติเด่นคือ
+\emph{additivity} และ \emph{local accuracy} ทำให้ผลรวม SHAP ของทุกฟีเจอร์
+เท่ากับส่วนต่างของพยากรณ์จากค่ากลาง การคำนวณ Shapley value โดยตรงเป็น NP-hard
+แต่ SHAP มีการประมาณการที่มีประสิทธิภาพสำหรับ tree-based model (TreeSHAP)
+และโครงข่ายประสาทเทียม (DeepSHAP, GradientSHAP)
+
+\subsection{LIME}
+
+\textbf{Ribeiro et~al.\ \cite{ribeiro2016should}} เสนอ LIME (Local
+Interpretable Model-Agnostic Explanations) ซึ่งสร้างคำอธิบายเฉพาะที่
+(local) โดยฝึก surrogate model เชิงเส้นบนตัวอย่างที่ perturb รอบ ๆ จุดที่
+สนใจ ในงาน NLP perturbation ทำโดย ``ลบ'' คำออกจากประโยคแล้วประเมินการ
+เปลี่ยนแปลงของพยากรณ์ จุดเด่นคือ \emph{model-agnostic} (ใช้กับแบบจำลองอะไร
+ก็ได้) จุดด้อยคือเสถียรภาพต่ำเมื่อตัวอย่าง perturbation ไม่มากพอ
+
+\subsection{Attention Rollout}
+
+\textbf{Abnar \& Zuidema \cite{abnar2020quantifying}} เสนอ ``attention
+rollout'' ในปี ค.ศ.\ 2020 เป็นวิธีรวม attention weights ข้าม layer ของ
+Transformer เป็นความสนใจรวมจาก \texttt{[CLS]} token ไปยัง input tokens
+หลักการคือคูณ attention matrices ข้าม layer หลังเพิ่ม identity ตัวแทน
+residual:
+\begin{equation}
+\tilde A^{(l)} = \tfrac{1}{2}\bigl(A^{(l)} + I\bigr),
+\qquad
+\mathrm{Rollout}^{(L)} = \prod_{l=1}^{L} \tilde A^{(l)}
+\label{eq:attnroll}
+\end{equation}
+ผลลัพธ์คือ ``ความสนใจรวม'' ของแต่ละ token ที่มีต่อการพยากรณ์สุดท้าย Chefer
+et~al.\ \cite{chefer2021transformer} ขยายแนวคิดนี้ด้วย gradient-weighted
+relevance propagation งานวิจัยปัจจุบันใช้ rollout แบบ Abnar \& Zuidema เพราะ
+เป็น baseline ที่ใช้แพร่หลายและไม่ต้อง backprop
+
+\section{สรุปบทและการวางตำแหน่งของงานวิจัย}
+\label{sec:lit-summary}
+
+วรรณกรรมที่ทบทวนชี้ให้เห็นว่า (1) การพยากรณ์ความไวรัลก่อนเผยแพร่เป็นโจทย์ที่
+ทำได้ยากเชิงข้อมูล (2) การใช้แบบจำลองภาษาขนาดใหญ่ที่ฝึกล่วงหน้าเป็น state-of-the-art
+ปัจจุบันสำหรับ NLP ภาษาไทย (3) Stacking และการปรับเทียบความน่าจะเป็นเป็น
+เทคนิคที่ผ่านการพิสูจน์แล้วในการเพิ่มประสิทธิภาพ (4) การทดสอบทางสถิติเช่น
+McNemar และ Cochran's Q เป็นมาตรฐานของการเปรียบเทียบ classifiers และ (5)
+SHAP/LIME/Attention rollout เป็นเครื่องมือ XAI ที่ได้รับการยอมรับ
+งานวิจัยปัจจุบันสร้างจุดร่วมระหว่างทั้ง 5 มิตินี้ในบริบทภาษาไทยที่ยังไม่มี
+งานก่อนหน้าทำอย่างครบถ้วน

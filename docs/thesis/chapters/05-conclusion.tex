@@ -1,0 +1,188 @@
+% chapters/05-conclusion.tex
+\chapter{สรุปผลและข้อเสนอแนะ}
+\label{ch:conclusion}
+
+\section{สรุปผลการวิจัย}
+\label{sec:conclusion-summary}
+
+งานวิจัยนี้นำเสนอ \emph{การศึกษาเชิงเปรียบเทียบอย่างเข้มงวด} ของแบบจำลอง
+ทรานส์ฟอร์เมอร์ภาษาไทยสามตัว (WangchanBERTa, PhayaThaiBERT, XLM-RoBERTa-large)
+สำหรับการพยากรณ์ความไวรัลของวิดีโอ YouTube ภาษาไทย โดยใช้ชุดข้อมูล 23{,}431
+วิดีโอจาก 82 ช่อง ภายใต้การแบ่งข้อมูลแบบ channel-grouped + time-aware
+ผลการศึกษาตอบโจทย์วัตถุประสงค์ทั้ง 7 ที่ตั้งไว้ในบทที่ \ref{ch:intro} ดังนี้
+
+\paragraph{(1) กระบวนการรวบรวมและจัดเตรียมข้อมูล}
+ได้ออกแบบและทดสอบ pipeline ที่ทำซ้ำได้ครบทั้ง 8 ระยะตั้งแต่ \texttt{make
+prepare} จนถึง \texttt{make eval} โดยใช้ MLflow บันทึก git SHA และ
+dataset hash ของทุก run
+
+\paragraph{(2) ดัชนีความไวรัลภายในช่อง}
+ได้นิยาม Per-Channel Virality Index ที่รวมอัตราส่วน engagement, like และ
+comment หลังการแปลงลอการิทึมและ z-score ภายในช่อง การกำหนดป้ายกำกับเป็น
+\emph{เดไซล์บนสุดต่อช่อง} ทำให้แบบจำลองไม่ใช้ \texttt{channel\_id} เป็นตัว
+พยากรณ์เดียว และยืนยันเชิงประจักษ์ผ่าน \texttt{channel\_prior baseline}
+ที่ได้ ROC-AUC = 0.293
+
+\paragraph{(3) การเปรียบเทียบทรานส์ฟอร์เมอร์สามตัว}
+PhayaThaiBERT ได้ ROC-AUC = 0.6451 (best encoder), WangchanBERTa 0.6402 และ
+XLM-RoBERTa-large 0.5450 พร้อม McNemar pairwise $p$-value ทุกคู่ $< 10^{-7}$
+
+\paragraph{(4) การเปรียบเทียบกับ baseline เชิงคลาสสิก}
+LightGBM-Structured+TF-IDF (0.6728) เป็นแบบจำลองเดี่ยวที่ดีที่สุด \emph{เหนือ}
+ทุก transformer ผลนี้บ่งชี้ว่าฟีเจอร์เชิงโครงสร้างของช่องและวิดีโอเป็น
+สัญญาณที่แข็งแกร่งและไม่ควรมองข้ามในงานพยากรณ์ความไวรัล
+
+\paragraph{(5) Stacking ensemble}
+Stacking ensemble ที่ปรับเทียบด้วย Platt scaling ได้ ROC-AUC = \textbf{0.6914
+[0.6625, 0.7174]} สูงกว่า single best 0.0186 อย่างมีนัยสำคัญ (McNemar
+$p = 6.9 \!\times\! 10^{-53}$) และ ECE = 0.016 ซึ่งถือว่าปรับเทียบดีมาก
+
+\paragraph{(6) การทดสอบทางสถิติ}
+Cochran's Q ระหว่างทรานส์ฟอร์เมอร์สามตัวได้ $Q = 612.69$, $p = 9\!\times\!10^{-134}$
+และระหว่าง 22 แบบจำลองได้ $Q = 10{,}957.49$, $p < 10^{-300}$ ยืนยันว่ารูปแบบ
+ความผิดพลาดของแบบจำลองต่างกันอย่างมีนัยสำคัญ ซึ่งเป็นเหตุผลเชิงทฤษฎีที่ stacking
+ทำงานได้ดี
+
+\paragraph{(7) ความสามารถในการอธิบาย}
+SHAP บน LightGBM-best ระบุว่า \texttt{duration\_seconds}, \texttt{channel\_avg\_engagement\_30d},
+และ \texttt{title\_length} เป็น 3 ฟีเจอร์ที่มีอิทธิพลสูงสุด LIME บน
+PhayaThaiBERT แสดงว่าชื่อเอนทิตี (\texttt{Roblox}, \texttt{RoV}) เป็น token
+ที่ขับเคลื่อนการพยากรณ์ Attention rollout ยืนยันว่าแบบจำลองรวมความสนใจไปยัง
+token ที่เป็นเอนทิตีในตัวอย่างที่ทำนายถูก
+
+\section{การสนับสนุนทางวิชาการ}
+\label{sec:conclusion-contributions}
+
+งานวิจัยนี้มีการสนับสนุนต่อชุมชน NLP ภาษาไทยและงาน social-media analytics
+ใน 5 ประเด็น ได้แก่
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Benchmark ที่เปิดเผยต่อสาธารณะ} — เป็นการเปรียบเทียบ Thai
+        transformer encoders บนปัญหา virality prediction ครั้งแรกที่ทราบ
+        พร้อมเปิดเผยการทำนายในรูป parquet ($\texttt{reports/artifacts/predictions/*/*.parquet}$)
+        ให้นักวิจัยรายอื่นสามารถนำไปเปรียบเทียบกับแบบจำลองของตน
+  \item \textbf{การออกแบบ Virality Index ภายในช่อง} — นิยามที่กำจัด confounder
+        เชิงขนาดช่องอย่างเป็นรูปธรรม ผ่านการใช้ z-score และเดไซล์ต่อช่อง
+        วิธีนี้สามารถนำไปประยุกต์กับงาน popularity prediction บน TikTok,
+        Facebook, Twitter ได้
+  \item \textbf{การยืนยันสมมติฐาน Encoder + Stacking} — แสดงว่าการประกอบ
+        ทรานส์ฟอร์เมอร์หลายตัวเข้ากับ classical models ผ่าน meta-LR ให้ผลดี
+        กว่าใช้แบบจำลองเดี่ยวที่ใหญ่ที่สุดเสมอ ในงานข้อความสั้นภาษาไทย
+  \item \textbf{การค้นพบเชิงลบที่ตรงไปตรงมา} — การรายงานว่า multi-field input
+        ทำให้ PhayaThaiBERT แย่ลง และ XLM-R-large ขนาด 560M ทำงานแย่กว่า
+        monolingual ขนาด 105M เป็นข้อมูลที่มีค่าต่อการออกแบบระบบในอนาคต
+  \item \textbf{ระเบียบวิธีวิจัยที่ทำซ้ำได้} — pipeline พร้อม
+        configs, seeds, MLflow tracking, git SHA tagging ที่ทำให้นักวิจัยรายอื่น
+        สามารถ reproduce ผลการศึกษานี้ได้ตั้งแต่ \texttt{make prepare} เมื่อ
+        ได้รับสิทธิ์เข้าถึงรหัสฐานจากคณะผู้วิจัย
+\end{enumerate}
+
+\section{ข้อจำกัดของการวิจัย}
+\label{sec:conclusion-limitations}
+
+แม้ผลการศึกษาจะแข็งแกร่งในเชิงระเบียบวิธี งานวิจัยนี้ยังมีข้อจำกัดที่ควรกล่าวถึง
+
+\subsection{ข้อจำกัดด้านข้อมูล}
+\begin{itemize}[leftmargin=2em]
+  \item ขนาดข้อมูล (23{,}431 วิดีโอ) ยังถือว่าเล็กสำหรับการปรับจูน LLM ขนาด
+        $\geq$1B parameter
+  \item การคัดเลือก 82 ช่องอาศัยเกณฑ์ผู้ติดตามขั้นต่ำ 100k ทำให้ไม่ครอบคลุม
+        ช่องขนาดเล็ก (creator emerging) ซึ่งเป็นกลุ่มที่ปัญหาการพยากรณ์ความ
+        ไวรัลมีคุณค่าสูงสุดในเชิงพาณิชย์
+  \item ใช้ snapshot ณ จุดเวลาเดียวของยอดเข้าชม (30-day window post-publish)
+        ไม่ได้ติดตามวิดีโอตลอด life-cycle
+\end{itemize}
+
+\subsection{ข้อจำกัดด้านแบบจำลอง}
+\begin{itemize}[leftmargin=2em]
+  \item ทั้งสามทรานส์ฟอร์เมอร์ใช้สถาปัตยกรรม RoBERTa-encoder เท่านั้น ไม่ได้
+        เปรียบเทียบกับ decoder LLM ภาษาไทย (Typhoon, OpenThaiGPT) แม้
+        codebase รองรับ QLoRA path
+  \item ฟีเจอร์ภาพ (thumbnail) ถูกลด complexity เป็นเพียง \texttt{has\_thumbnail\_face}
+        (binary) ไม่ได้ใช้แบบจำลอง vision-language เช่น CLIP ที่ฝึกบนภาษาไทย
+  \item ฟีเจอร์เสียง (audio) จากตัววิดีโอเอง ไม่ถูกใช้ในงานนี้ ทั้งที่งานวิจัย
+        multimodal บน TikTok และ YouTube รายงานว่าเสียงมีคุณค่าเชิงพยากรณ์เด่นชัด
+        โดยเฉพาะสำหรับเนื้อหาด้าน Music และ Entertainment
+\end{itemize}
+
+\subsection{ข้อจำกัดด้านการประเมินผล}
+\begin{itemize}[leftmargin=2em]
+  \item ROC-AUC สูงสุดที่ 0.6914 บ่งชี้ว่า \textbf{ปัญหาการพยากรณ์ความไวรัล
+        ก่อนเผยแพร่มี ``ceiling'' ของข้อมูล} ที่อยู่ในช่วง 0.70 ไม่ใช่ ceiling
+        ของแบบจำลอง การเพิ่มข้อมูลภาพหรือ audio น่าจะเป็นทางออก
+  \item ใช้เกณฑ์เดียว (top-decile per channel) ในการกำหนดป้ายกำกับ ไม่ได้
+        ศึกษาความ sensitivity ของแบบจำลองต่อการเปลี่ยนเกณฑ์เป็น top-5\% หรือ
+        top-20\%
+\end{itemize}
+
+\section{ข้อเสนอแนะสำหรับการวิจัยต่อยอด}
+\label{sec:conclusion-future}
+
+\subsection{การขยายข้อมูลและฟีเจอร์}
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{ขยายขนาดข้อมูลให้ถึง 100k+ วิดีโอ} จาก 500+ ช่อง ครอบคลุมหมวดหมู่
+        เพิ่มเติม (News, Education, Howto) เพื่อให้แบบจำลอง 560M$+$ มีข้อมูล
+        ฝึกที่เพียงพอ
+  \item \textbf{เพิ่มฟีเจอร์ thumbnail} ผ่าน multimodal LM เช่น
+        \texttt{thaiclip} หรือ \texttt{Llava-1.5-Thai} เพื่อรวมข้อมูลภาพและ
+        ข้อความ
+  \item \textbf{เพิ่มฟีเจอร์ audio} ด้วย Whisper transcripts หรือ wav2vec
+        embeddings สำหรับวิดีโอที่มี content เป็นภาษาไทย
+  \item \textbf{ฟีเจอร์ network} ที่สะท้อนความสัมพันธ์ระหว่างช่อง เช่น
+        co-mention graph, collaboration network
+\end{enumerate}
+
+\subsection{การขยายแบบจำลอง}
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{เปรียบเทียบกับ decoder LLM} (Typhoon 2.5, OpenThaiGPT)
+        ด้วย QLoRA ที่ codebase รองรับอยู่ แม้ผู้วิจัยคาดว่า encoder ยังเป็น
+        choice ที่ดีกว่าสำหรับงาน classification ขนาดเล็ก
+  \item \textbf{In-context learning} กับ Llama-3.1-Thai-instruct โดย few-shot
+        prompts เพื่อทดสอบว่า zero-shot/few-shot ของ instruct LM ทำได้ดี
+        เพียงใดเทียบกับการ fine-tune
+  \item \textbf{Domain-adaptive pretraining} ของ PhayaThaiBERT บนคลังข้อมูล
+        YouTube ภาษาไทยขนาดใหญ่ ก่อน fine-tune บน virality task
+  \item \textbf{Causal inference} แทนที่ correlation-based prediction โดย
+        ใช้ propensity score matching เพื่อตอบคำถามว่า ``ถ้าเปลี่ยนชื่อวิดีโอ
+        จาก A เป็น B แล้วจะไวรัลขึ้นกี่ percentage point?''
+\end{enumerate}
+
+\subsection{การขยายเชิงประยุกต์}
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Real-time prediction service} ที่ deploy แบบจำลอง stacking
+        ผ่าน FastAPI + Cloudflare Workers ให้ผู้สร้างเนื้อหาทดสอบชื่อก่อน
+        เผยแพร่
+  \item \textbf{Counterfactual title rewriting} ที่ใช้ Thai-T5 หรือ Typhoon
+        เป็น generator แล้วใช้ stacking ของงานนี้เป็น critic เพื่อหาเวอร์ชัน
+        ของชื่อที่มีโอกาสไวรัลสูงขึ้น
+  \item \textbf{Multi-platform extension} ไปยัง TikTok ไทย และ Facebook
+        Reels ภาษาไทย โดยใช้ระเบียบวิธีเดียวกัน
+\end{enumerate}
+
+\subsection{การขยายเชิงระเบียบวิธี}
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Time-decayed evaluation} ที่ประเมินแบบจำลองทุก 30 วันบน
+        วิดีโอใหม่ เพื่อตรวจสอบ \emph{model drift} และความถี่ของการ retrain
+        ที่ต้องการ
+  \item \textbf{Fairness audit} ระหว่างช่องเพศชาย/เพศหญิง/LGBTQ+ และระหว่าง
+        เนื้อหาภาษาไทยภาคต่าง ๆ (กลาง / เหนือ / อีสาน / ใต้)
+  \item \textbf{Adversarial robustness} ทดสอบความเสถียรของแบบจำลองเมื่อ
+        attacker เพิ่ม noise หรือ adversarial token เข้าไปในชื่อ
+\end{enumerate}
+
+\section{ข้อสรุปท้ายสุด}
+\label{sec:conclusion-final}
+
+\textbf{ความไวรัลของวิดีโอ YouTube ภาษาไทยพยากรณ์ได้} ในระดับที่มีประโยชน์
+เชิงพาณิชย์ (ROC-AUC = 0.69 พร้อมการปรับเทียบดี ECE = 0.016) ผ่านการรวม
+แบบจำลองทรานส์ฟอร์เมอร์ภาษาไทยกับฟีเจอร์เชิงโครงสร้างใน stacking ensemble
+ทรานส์ฟอร์เมอร์ภาษาไทย \emph{monolingual} (PhayaThaiBERT, WangchanBERTa) ทำงาน
+ดีกว่า \emph{multilingual} ขนาดใหญ่ (XLM-RoBERTa-large) อย่างมีนัยสำคัญ
+แต่ \textbf{ไม่ได้} ทำงานดีกว่า LightGBM ที่ฝึกบนฟีเจอร์เชิงโครงสร้างของช่อง
+และวิดีโอ คุณค่าหลักของทรานส์ฟอร์เมอร์ในงานนี้ปรากฏผ่าน \textbf{ความหลากหลาย
+ของรูปแบบความผิดพลาด} ที่ stacking ดึงสัญญาณมาประกอบ ไม่ใช่ผ่านการเป็น single
+best classifier
+
+งานวิจัยนี้จึงให้บทเรียนที่สำคัญต่อชุมชน NLP ภาษาไทย: \emph{ในงาน classification
+ขนาดเล็ก ขนาดของแบบจำลองไม่ใช่ปัจจัยเดียว และการประกอบหลาย ``มุมมอง'' อาจมี
+คุณค่ามากกว่าการมุ่งเน้นที่ single SOTA model}

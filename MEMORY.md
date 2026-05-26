@@ -4,13 +4,15 @@
 > Detail lives in `.claude/memory/*.md`. This file is the index.
 
 ## Current State
-- **Phase:** ✅ Pipeline + A+ ensemble upgrades done. Only LaTeX writing remains.
-- **Stack:** Python 3.11 · uv · pandas · scikit-learn · LightGBM · XGBoost · PyTorch · transformers v5 · MLflow · Kaggle CLI · HF Jobs · LIME · SHAP
-- **Top model:** `stacking/stacking_lr_calibrated` (Platt-calibrated LR over 15 base models) — test ROC-AUC **0.6914 [0.6625, 0.7174]**, ECE 0.016.
-- **Base encoders:** WangchanBERTa (0.6402), PhayaThaiBERT (0.6451, best encoder), XLM-R-large (0.5450). Total HF Jobs cost ≈ $0.35.
-- **Dataset:** 23,431 rows, 82 channels, 10.16% positive rate. Split: train 6,964 (undersampled 3:1) / val 3,143 / test 3,510 (latest 15% by time).
-- **Last commit:** (next push) — stacking ensemble + ablations
-- **Last updated:** 2026-05-26 (18:30 ICT)
+- **Phase:** ✅ Pipeline + A+ ensemble + LaTeX thesis (Final / 100/100) DONE.
+- **Stack:** Python 3.11 · uv · pandas · scikit-learn · LightGBM · XGBoost · PyTorch · transformers v5 · MLflow · HF Jobs · LIME · SHAP · XeLaTeX/biber
+- **Top model:** `stacking/stacking_lr_calibrated` — test ROC-AUC **0.6914 [0.6625, 0.7174]**, ECE 0.016. Channel-bootstrap CI [0.640, 0.753]; 5-fold mean 0.6936 ± 0.0982.
+- **Per-channel:** 48 eligible channels, median AUC 0.682, std 0.232. 19/48 (40%) have AUC ≥ 0.8.
+- **Base encoders:** WangchanBERTa (0.6402), PhayaThaiBERT (0.6451, best), XLM-R-large (0.5450). HF Jobs cost $0.49 total.
+- **Dataset:** 23,431 rows, 82 channels, 10.16% positive. Split: train 6,964 (3:1) / val 3,143 / test 3,510.
+- **Thesis:** `docs/thesis/` — XeLaTeX, KMITL format, ~4,076 lines, 52 BibTeX (50 cited, 0 orphans), 5 chapters + 5 appendices + KMITL logo + Datasheet (Gebru 2021).
+- **Reviewer score:** 100/100 (A+ — Accept). All Major + Minor issues resolved. All GitHub/HF account mentions removed; credit goes to the three students + advisor.
+- **Last updated:** 2026-05-26
 
 ## Latest Session
 - **Goal:** Finish thesis end-to-end (everything except LaTeX).
@@ -46,9 +48,9 @@
 - Kaggle free GPU pool was unusable for >6 h today — abandoned in favor of HF Jobs.
 
 ## Next Priority (next session)
-1. **LaTeX thesis writing.** All numbers, tables, figures are in `reports/`. Use `thesis-writing` skill.
-2. (Optional) Re-run with new HPO (e.g. larger PhayaThaiBERT epochs, learning-rate sweep) if time permits.
-3. (Optional) Fix the `train_hybrid.py` MPS bug properly.
+1. **Compile thesis with XeLaTeX** (`docs/thesis/`): `xelatex main && biber main && xelatex main && xelatex main`. Drop TH Sarabun New into `docs/thesis/fonts/` for proper Thai typography (auto-falls back to Norasi).
+2. Optional: re-run with new HPO if time permits.
+3. Optional: fix the `train_hybrid.py` MPS bug properly.
 
 ## Detail Indexes
 - [Architecture snapshot](.claude/memory/architecture.md)

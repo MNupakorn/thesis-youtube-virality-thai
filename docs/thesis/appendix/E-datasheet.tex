@@ -1,0 +1,160 @@
+% appendix/E-datasheet.tex — Datasheet for the corpus (Gebru et al. 2021 style)
+\chapter{Datasheet สำหรับชุดข้อมูล}
+\label{app:datasheet}
+
+ภาคผนวกนี้จัดทำในรูปแบบ \emph{Datasheet for Datasets} ตาม Gebru et~al.\
+(Communications of the ACM, 2021) เพื่ออธิบาย corpus ที่ใช้ในการศึกษานี้
+ในระดับรายละเอียดที่งานวิจัยอื่นสามารถนำไปประเมินความเหมาะสมต่อภาระงาน
+ของตนได้
+
+\section{แรงจูงใจ (Motivation)}
+
+\paragraph{Q1. ใครสร้างชุดข้อมูลนี้และเพื่อจุดประสงค์ใด}
+ชุดข้อมูลถูกสร้างโดยคณะผู้วิจัยปริญญาตรี ภาควิชาสถิติประยุกต์และการวิเคราะห์
+ข้อมูล KMITL เพื่อการศึกษาเปรียบเทียบประสิทธิภาพของแบบจำลองทรานส์ฟอร์เมอร์
+ภาษาไทยในงานพยากรณ์ความไวรัล
+
+\paragraph{Q2. ใครเป็นผู้สนับสนุนการสร้างชุดข้อมูล}
+งานวิจัยใช้ public API ของ YouTube (free tier 10{,}000 units/day) ไม่มี
+แหล่งทุนภายนอก ค่าใช้จ่าย cloud GPU (\$0.49 USD) คณะผู้วิจัยรับผิดชอบเอง
+
+\paragraph{Q3. ตอบช่องว่างใดในวรรณกรรม}
+(1) ไม่มีงานก่อนหน้าที่เปรียบเทียบ Thai transformer encoders บนงาน virality
+prediction บนชุดข้อมูลเดียวกัน (2) ไม่มี Thai YouTube corpus สาธารณะที่
+ออกแบบเพื่อการศึกษาความไวรัลแบบ \emph{intra-channel}
+
+\section{องค์ประกอบ (Composition)}
+
+\paragraph{Q4. ตัวอย่างเป็นอะไร}
+หนึ่งตัวอย่าง = หนึ่งวิดีโอ YouTube ภาษาไทย ระดับ public visibility
+ประกอบด้วยข้อความ (title, description, tags), meta-data ของช่อง,
+ตัวชี้วัด engagement (views, likes, comments) ณ snapshot date
+
+\paragraph{Q5. มีกี่ตัวอย่าง}
+23{,}431 วิดีโอ จาก 82 ช่อง เผยแพร่ระหว่าง พ.ศ.\ 2562--2569 (10 ปี)
+ขนาดทางสถิติ: ตัวอย่างต่อช่องเฉลี่ย = 285 (ต่ำสุด 12, สูงสุด 1{,}847)
+
+\paragraph{Q6. แต่ละตัวอย่างประกอบด้วยข้อมูลใด}
+ดูตารางที่ \ref{tab:fields} ในบทที่ \ref{ch:method} (15 ฟิลด์หลัก)
+หลังการแปลงเป็นฟีเจอร์ ผลคือ 27 structural + 6 sentiment + 768 embedding
++ 20{,}000 TF-IDF dimensions (ใช้แยกตามชนิดของแบบจำลอง)
+
+\paragraph{Q7. มี label หรือ target หรือไม่}
+มี label เป็นทวิภาค $y_i \in \{0, 1\}$ คำนวณจากดัชนี $\mathit{VI}$ ในบทที่
+\ref{ch:method} \S\ref{sec:method-vi} เกณฑ์ = top-decile per channel
+
+\paragraph{Q8. มีข้อมูลที่หายหรือไม่}
+มี \texttt{description = ""} ใน $\sim$8\% ของวิดีโอ \texttt{tags = []} ใน
+$\sim$15\% มีการ impute เป็นสตริงว่างก่อนสร้างฟีเจอร์ ส่วน \texttt{view\_count = NULL}
+ถูกตัดออกในระยะการ clean
+
+\paragraph{Q9. ความสัมพันธ์ระหว่างตัวอย่างมีหรือไม่}
+\textbf{มี} วิดีโอที่อยู่ในช่องเดียวกันมีความสัมพันธ์เชิงโครงสร้าง (รูปแบบภาษา
+ของผู้สร้าง audience overlap, recommendation algorithm bias) คณะผู้วิจัย
+จัดการความสัมพันธ์นี้ผ่าน channel-grouped split (ดู \S\ref{sec:method-split})
+
+\paragraph{Q10. มี split ที่แนะนำหรือไม่}
+ใช่ — train (6{,}964) / val (3{,}143) / test (3{,}510) แบบ channel-grouped
++ time-aware (\S\ref{sec:method-split}) split files อยู่ใน
+\texttt{data/processed/dataset\_with\_labels.parquet} โดยฟิลด์ \texttt{split}
+
+\paragraph{Q11. มี noise / errors ที่ทราบหรือไม่}
+(1) Unicode mojibake ในชื่อวิดีโอบางส่วนของช่องเก่า (พบ $<$1\%) (2) จำนวน
+\texttt{like\_count} อาจไม่ตรงกับช่วงเวลาของ \texttt{view\_count} เพราะ API
+ส่ง snapshot ณ เวลาที่ query แต่ไม่มีการ versioning
+
+\paragraph{Q12. ชุดข้อมูล self-contained หรือพึ่ง resource ภายนอก}
+ครบสมบูรณ์ในไฟล์ \texttt{parquet} เดียว ไม่ต้องการ resource ภายนอก ยกเว้น
+ฟีเจอร์ที่สกัดหลังจากนั้น (sentiment cache + title embeddings) ซึ่งสามารถ
+recompute ได้จาก raw text
+
+\paragraph{Q13. มีข้อมูลที่อาจถือว่าเป็น secret หรือไม่}
+ไม่มี. ทุกฟิลด์ถูกเปิดเผยต่อสาธารณะผ่าน YouTube web UI
+
+\paragraph{Q14. มีข้อมูลที่อาจสร้างความรู้สึกไม่สบายใจให้ผู้อ่านหรือไม่}
+ในชื่อวิดีโอบางส่วนของหมวด Entertainment มีคำหยาบหรือคำที่กระตุ้นอารมณ์
+ในเชิงลบ คณะผู้วิจัยไม่ได้กรองออก เพราะคำเหล่านี้เป็นส่วนหนึ่งของ phenomenon
+ที่ศึกษา
+
+\section{การเก็บรวบรวม (Collection)}
+
+\paragraph{Q15. กระบวนการเก็บข้อมูล}
+ใช้ \texttt{src/data\_collection/youtube\_collector.py} เรียก
+YouTube Data API v3 endpoint \texttt{videos.list}, \texttt{channels.list},
+\texttt{search.list} โดย \texttt{maxResults=50} ต่อ request
+
+\paragraph{Q16. ใครเก็บข้อมูล}
+คณะผู้วิจัยเอง ระหว่าง พ.ค.\ 2569
+
+\paragraph{Q17. การจ่ายเงินตอบแทนผู้เข้าร่วม}
+ไม่เกี่ยวข้อง (ข้อมูลสาธารณะ ไม่มี human subject)
+
+\paragraph{Q18. ระยะเวลาการเก็บ}
+24 ชั่วโมง (single snapshot) ในวันที่ 30 เมษายน 2569
+
+\paragraph{Q19. การพิจารณาทางจริยธรรม / IRB}
+ไม่เข้าข่าย IRB เพราะ (1) ไม่มี human subject (2) ใช้ข้อมูลสาธารณะ (3) ไม่มี
+PII คณะผู้วิจัยปฏิบัติตาม YouTube API Services Terms of Service ทุกประการ
+
+\section{การ Preprocessing / Labeling / Cleaning}
+
+\paragraph{Q20. การ preprocess ที่ทำ}
+ดู \S\ref{sec:method-labels} (clean) และ \S\ref{sec:method-features}
+(feature extraction) ทุกขั้นตอนใน \texttt{src/data\_processing/} และ
+\texttt{src/features/}
+
+\paragraph{Q21. ข้อมูลดิบยังถูกเก็บไว้หรือไม่}
+\textbf{ใช่} \texttt{data/raw/youtube\_thai\_videos.parquet} ถูกเก็บไว้
+ในเครื่องของคณะผู้วิจัย และในที่เก็บข้อมูลส่วนตัว (private dataset
+repository) ของคณะผู้วิจัยและอาจารย์ที่ปรึกษา
+
+\paragraph{Q22. software ที่ใช้ preprocess}
+Python 3.11, pandas 2.x, pyarrow 15.x, PyThaiNLP 5.x ทั้งหมดเป็น
+open-source
+
+\section{การใช้งาน (Uses)}
+
+\paragraph{Q23. มีงานวิจัยอื่นที่ใช้ชุดข้อมูลนี้แล้วหรือยัง}
+ยังไม่มี ปัญหาพิเศษนี้เป็นการใช้งานครั้งแรก
+
+\paragraph{Q24. ชุดข้อมูลถูกใช้ในงานประเภทใดได้บ้าง}
+นอกจาก virality prediction แล้ว สามารถใช้ในงาน (1) Thai title
+generation/rewriting (2) channel-level engagement modelling (3) Thai
+sentiment-engagement correlation studies
+
+\paragraph{Q25. มีการใช้งานที่ \emph{ไม่ควร} ทำหรือไม่}
+\textbf{ไม่ควร} ใช้เพื่อ
+(1) เปิดเผยข้อมูลรายบุคคลของผู้สร้างเนื้อหา (channel\_id เปิดเผย แต่ไม่ควร
+นำไปจับคู่กับข้อมูลส่วนตัว) (2) สร้างเครื่องมือ \emph{predict-and-attack}
+ช่อง competitor (3) optimisation ที่ละเมิด YouTube TOS (เช่น
+view-count manipulation)
+
+\section{การจัดเก็บและการแจกจ่าย (Distribution)}
+
+\paragraph{Q26. ชุดข้อมูลจะแจกจ่ายให้บุคคลที่สามหรือไม่}
+\textbf{เฉพาะคำขอเชิงวิชาการ} เพื่อปฏิบัติตาม YouTube TOS Section II.B.3
+ที่ห้าม redistributable ของ Content เชิงพาณิชย์ ผู้ขอใช้ต้องลงนามใน data
+use agreement และมี institutional affiliation
+
+\paragraph{Q27. แจกจ่ายผ่านช่องทางใด}
+ผ่านที่เก็บข้อมูลส่วนตัวของคณะผู้วิจัยและอาจารย์ที่ปรึกษา โดยให้สิทธิ์
+เป็นรายบุคคลตามเงื่อนไขข้อ Q26
+
+\paragraph{Q28. มี IP หรือสัญญาเงื่อนไขการใช้หรือไม่}
+ผู้ขอใช้ต้องอ่านและยอมรับ \emph{YouTube API Services Terms of Service} ก่อน
+และตกลงไม่ redistribute ภายใต้เงื่อนไข non-commercial / academic-only
+
+\section{การบำรุงรักษา (Maintenance)}
+
+\paragraph{Q29. ใครรับผิดชอบดูแล / อัปเดต}
+ระหว่างที่ปัญหาพิเศษอยู่ในการประเมิน — คณะผู้วิจัย หลังจากนั้น — อาจารย์
+ที่ปรึกษา (\advisor)
+
+\paragraph{Q30. มีกำหนดอัปเดตเวอร์ชันใหม่หรือไม่}
+ไม่มี ชุดข้อมูลถูก freeze ไว้ตามวันที่ snapshot สำหรับการ reproduce
+สถานะปัจจุบันอย่างถาวร
+
+\paragraph{Q31. ติดต่อผู้ดูแลได้ที่ใด}
+ผ่านอาจารย์ที่ปรึกษา (\advisor) หรือคณะผู้วิจัยทั้งสาม
+(\authorone, \authortwo, \authorthree) ผ่านช่องทางอีเมลของ
+\school\ \university

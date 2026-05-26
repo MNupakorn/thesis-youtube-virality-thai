@@ -1,0 +1,708 @@
+% chapters/03-methodology.tex
+\chapter{ระเบียบวิธีวิจัย}
+\label{ch:method}
+
+บทนี้อธิบายระเบียบวิธีวิจัยตั้งแต่การเก็บรวบรวมข้อมูลจนถึงการประเมินผล
+แบ่งเป็น 9 ส่วน ได้แก่ (1) ภาพรวมของขั้นตอน (2) การเก็บข้อมูลผ่าน YouTube
+Data API v3 (3) การทำความสะอาดและสร้างป้ายกำกับด้วย Virality Index (4)
+การแบ่งชุดข้อมูลแบบ channel-grouped + time-aware (5) การออกแบบและสกัดฟีเจอร์
+(6) แบบจำลองพื้นฐาน (7) การปรับจูนทรานส์ฟอร์เมอร์ภาษาไทย (8) การประกอบและ
+การปรับเทียบ และ (9) ระเบียบการประเมินผลและการทดสอบทางสถิติ
+
+\section{ภาพรวมของขั้นตอนและสถาปัตยกรรมของระบบ}
+\label{sec:method-overview}
+
+งานวิจัยใช้ระเบียบวิธีเชิงปริมาณแบบ \emph{ทดลองเปรียบเทียบ} (comparative
+experimental) บนชุดข้อมูลทดสอบเดียวกัน ขั้นตอนแบ่งออกเป็น 8 ระยะดังภาพที่
+\ref{fig:pipeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.9cm,
+  box/.style={rectangle,draw,rounded corners,align=center,minimum width=2.7cm,minimum height=0.85cm,font=\small},
+  arr/.style={-{Stealth[length=2mm]},thick}
+]
+\node[box,fill=blue!10] (collect) {Collect\\(API v3)};
+\node[box,fill=blue!10,right=of collect] (clean) {Clean};
+\node[box,fill=orange!15,right=of clean] (label) {Virality\\Index};
+\node[box,fill=orange!15,right=of label] (split) {Split\\(grp/time)};
+\node[box,fill=green!15,below=of collect] (struct) {Structural\\features};
+\node[box,fill=green!15,right=of struct] (sent) {Sentiment};
+\node[box,fill=green!15,right=of sent] (tfidf) {TF-IDF};
+\node[box,fill=green!15,right=of tfidf] (emb) {Title\\embeddings};
+\node[box,fill=red!15,below=of struct] (base) {Baselines};
+\node[box,fill=red!15,right=of base] (encfb) {Transformers\\$\times 3$};
+\node[box,fill=red!15,right=of encfb] (hybrid) {Hybrid\\MLP+GBM};
+\node[box,fill=purple!20,right=of hybrid] (stack) {Stacking +\\Calibration};
+\node[box,fill=gray!20,below=of base] (eval) {ROC/PR/F1\\McNemar/Q};
+\node[box,fill=gray!20,right=of eval] (cal) {Calibration\\(ECE)};
+\node[box,fill=gray!20,right=of cal] (xai) {SHAP / LIME\\Attention};
+\node[box,fill=gray!20,right=of xai] (report) {Tables\\Figures};
+\draw[arr] (collect) -- (clean);
+\draw[arr] (clean) -- (label);
+\draw[arr] (label) -- (split);
+\draw[arr] (split.south) -- ++(0,-0.3) -| (struct.north);
+\draw[arr] (struct) -- (sent);
+\draw[arr] (sent) -- (tfidf);
+\draw[arr] (tfidf) -- (emb);
+\draw[arr] (emb.south) -- ++(0,-0.3) -| (base.north);
+\draw[arr] (base) -- (encfb);
+\draw[arr] (encfb) -- (hybrid);
+\draw[arr] (hybrid) -- (stack);
+\draw[arr] (stack.south) -- ++(0,-0.3) -| (eval.north);
+\draw[arr] (eval) -- (cal);
+\draw[arr] (cal) -- (xai);
+\draw[arr] (xai) -- (report);
+\end{tikzpicture}
+\caption{ภาพรวมขั้นตอนของระบบ จากการเก็บข้อมูลถึงการรายงานผล}
+\label{fig:pipeline}
+\end{figure}
+
+ระบบทั้งหมดถูกพัฒนาด้วยภาษา Python 3.11 บนสภาพแวดล้อม \texttt{uv} โดยใช้
+ไลบรารีหลัก ได้แก่ \texttt{pandas}, \texttt{scikit-learn}, \texttt{lightgbm},
+\texttt{xgboost}, \texttt{torch}, \texttt{transformers v5}, \texttt{pythainlp},
+\texttt{shap}, \texttt{lime}, \texttt{mlflow} ทุกขั้นตอนถูกบันทึกเป็น MLflow
+run พร้อม git SHA และ dataset hash
+
+\section{การเก็บรวบรวมข้อมูล}
+\label{sec:method-collection}
+
+\subsection{จริยธรรมการวิจัยและความสอดคล้องกับนโยบายแพลตฟอร์ม}
+\label{sec:method-ethics}
+
+ข้อมูลทั้งหมดในงานวิจัยนี้เก็บผ่าน \textbf{YouTube Data API v3} ซึ่งเป็น
+endpoint สาธารณะที่ Google เปิดให้นักพัฒนาเข้าถึงได้ภายใต้ \emph{YouTube
+API Services Terms of Service}. คณะผู้วิจัยได้ปฏิบัติตามข้อกำหนดดังนี้
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{ใช้เฉพาะข้อมูลสาธารณะ} ไม่มีการ scrape เนื้อหา private,
+        comment threads ที่ผู้ใช้ลบ, หรือข้อมูลที่ต้องการ user authentication
+  \item \textbf{เคารพ rate limit} ของ API quota (10{,}000 units/day) โดย
+        scheduler ที่ \texttt{src/data\_collection/youtube\_collector.py}
+        ใช้ exponential backoff
+  \item \textbf{ไม่เก็บข้อมูลส่วนบุคคล} (PII) ของผู้แสดงความคิดเห็นหรือผู้ติดตาม
+        เก็บเฉพาะข้อมูลระดับวิดีโอและช่อง
+  \item \textbf{ไม่ commit ข้อมูลดิบ} ลง git (กฎใน \texttt{CLAUDE.md} ห้าม commit
+        \texttt{data/raw/})
+  \item \textbf{การอนุมัติเชิงสถาบัน} ปัญหาพิเศษนี้ไม่เกี่ยวข้องกับการเก็บข้อมูล
+        ส่วนบุคคลของมนุษย์ จึงไม่อยู่ในขอบเขตที่ต้องผ่าน Institutional Review
+        Board (IRB). อย่างไรก็ตาม คณะผู้วิจัยได้รายงานการออกแบบเก็บข้อมูลต่อ
+        อาจารย์ที่ปรึกษาและได้รับอนุมัติก่อนดำเนินการ
+\end{itemize}
+
+\subsection{แหล่งข้อมูลและขอบเขต}
+
+ข้อมูลถูกเก็บผ่าน YouTube Data API v3 ซึ่งให้สิทธิ์อ่านข้อมูลสาธารณะของวิดีโอ
+และช่อง การคัดเลือกช่องเป้าหมายอาศัย 3 เกณฑ์ คือ (1) ภาษาหลักของช่องเป็น
+ภาษาไทย (2) มีผู้ติดตามขั้นต่ำ 100{,}000 คน เพื่อให้มีปริมาณวิดีโอเพียงพอ
+ต่อการคำนวณ z-score ภายในช่อง และ (3) อยู่ในหมวดหมู่ Entertainment, Gaming
+หรือ Music ที่เป็นหมวดหมู่ที่ผู้ชมไทยมีอัตราการมีส่วนร่วมสูงที่สุดตามรายงาน
+DataReportal \cite{datareportal2025thailand}
+
+จำนวนช่องที่เก็บได้คือ 82 ช่อง วิดีโอเก็บได้ 23{,}431 รายการ การกระจายของ
+ช่องตามขนาด (subscriber bucket) แสดงในตารางที่ \ref{tab:channels}
+
+\begin{table}[H]
+\centering
+\caption{การกระจายของช่องเป้าหมายตามขนาด}
+\label{tab:channels}
+\begin{tabularx}{\textwidth}{lXrr}
+\toprule
+\textbf{Bucket} & \textbf{ช่วงผู้ติดตาม} & \textbf{จำนวนช่อง} & \textbf{จำนวนวิดีโอ} \\
+\midrule
+mid     & 100{,}000--1{,}000{,}000  & 41 & 9{,}208 \\
+large   & 1{,}000{,}000--10{,}000{,}000 & 33 & 12{,}847 \\
+mega    & $\geq$10{,}000{,}000 & 8  & 1{,}376 \\
+\midrule
+\textbf{รวม} & & \textbf{82} & \textbf{23{,}431} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{ตัวแปรที่จัดเก็บ}
+
+จาก endpoint \texttt{videos.list} เก็บฟิลด์ \texttt{snippet}, \texttt{statistics},
+\texttt{contentDetails} และ \texttt{topicDetails} จาก endpoint
+\texttt{channels.list} เก็บ \texttt{snippet}, \texttt{statistics},
+\texttt{topicDetails} ฟิลด์สำคัญแสดงในตารางที่ \ref{tab:fields}
+
+\begin{table}[H]
+\centering
+\caption{ตัวแปรหลักที่จัดเก็บจาก YouTube Data API v3}
+\label{tab:fields}
+\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{ฟิลด์} & \textbf{คำอธิบาย} & \textbf{ชนิด} \\
+\midrule
+\texttt{video\_id}        & รหัสเฉพาะของวิดีโอ                       & string \\
+\texttt{channel\_id}      & รหัสเฉพาะของช่องเจ้าของ                  & string \\
+\texttt{title}            & ชื่อวิดีโอ                                & string \\
+\texttt{description}      & คำอธิบายวิดีโอ                            & string \\
+\texttt{tags}             & แท็กที่ผู้สร้างกำหนด (ลิสต์)             & list \\
+\texttt{category\_id}     & หมวดหมู่มาตรฐาน YouTube                  & int \\
+\texttt{published\_at}    & วันที่และเวลาที่เผยแพร่ (ISO 8601 UTC)    & datetime \\
+\texttt{duration}         & ความยาววิดีโอ (ISO 8601 duration)         & string \\
+\texttt{view\_count}      & จำนวนยอดเข้าชม (เก็บ ณ snapshot)         & int \\
+\texttt{like\_count}      & จำนวนกดถูกใจ                              & int \\
+\texttt{comment\_count}   & จำนวนความคิดเห็น                         & int \\
+\texttt{channel\_subscribers}      & จำนวนผู้ติดตามของช่อง            & int \\
+\texttt{channel\_video\_count}     & จำนวนวิดีโอทั้งหมดของช่อง        & int \\
+\texttt{channel\_view\_count}      & ยอดเข้าชมรวมของช่อง               & int \\
+\texttt{channel\_published\_at}    & วันที่สร้างช่อง                  & datetime \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+ข้อมูลทั้งหมดถูกบันทึกในรูป \texttt{parquet} ที่ \texttt{data/raw/youtube\_thai\_videos.parquet}
+และไม่ commit เข้า git ตามกฎด้านการรักษาความเป็นส่วนตัวของช่อง
+
+\section{การทำความสะอาดและการสร้างป้ายกำกับ}
+\label{sec:method-labels}
+
+\subsection{การทำความสะอาดข้อมูล}
+
+โมดูล \texttt{src/data\_processing/clean.py} ทำการ (1) ลบวิดีโอที่ \texttt{view\_count}
+เป็น \texttt{NULL} หรือต่ำกว่า 100 (เป็นวิดีโอใหม่ที่ยังไม่มีสัญญาณ engagement)
+(2) ลบวิดีโอที่ \texttt{title} ว่างเปล่าหรือมีอักขระที่ไม่ใช่ภาษาไทย/อังกฤษ
+มากกว่า 80\% (3) แปลง \texttt{duration} ISO 8601 เป็นวินาที (4) คำนวณอายุ
+วิดีโอเป็นวันจาก \texttt{published\_at} และ snapshot date และ (5) ทำการ
+deduplicate บน \texttt{video\_id}
+
+\subsection{การออกแบบดัชนีความไวรัล}
+\label{sec:method-vi}
+
+ดัชนีความไวรัล ($\mathit{VI}$) ถูกออกแบบให้ \emph{ปราศจากความเอนเอียง
+เชิงขนาดช่อง} โดยรวม 3 อัตราส่วนเชิง engagement ที่ normalise ภายในช่องแล้ว
+ขั้นตอนเชิงคณิตศาสตร์ดังนี้
+
+\paragraph{ขั้นที่ 1: คำนวณอัตราส่วนต่อยอดเข้าชม}
+\begin{align}
+r_{\text{eng},i}    &= \frac{l_i + c_i}{v_i + 1} \label{eq:r-eng} \\
+r_{\text{like},i}   &= \frac{l_i}{v_i + 1}        \label{eq:r-like} \\
+r_{\text{cmt},i}    &= \frac{c_i}{v_i + 1}        \label{eq:r-cmt}
+\end{align}
+โดย $v_i, l_i, c_i$ คือ \texttt{view\_count}, \texttt{like\_count},
+\texttt{comment\_count} ของวิดีโอ $i$ บวก $+1$ ในตัวส่วนเพื่อหลีกเลี่ยง
+ปัญหา $0/0$
+
+\paragraph{ขั้นที่ 2: การแปลงลอการิทึม}
+\begin{equation}
+r'_i = \log_{10}(1 + r_i)
+\label{eq:logtrans}
+\end{equation}
+การแปลงนี้ลดความเบ้ขวา (right-skewness) ของอัตราส่วน engagement ที่มัก
+มีหางยาว
+
+\paragraph{ขั้นที่ 3: Z-score ภายในช่อง}
+สำหรับแต่ละช่อง $g$ คำนวณ
+\begin{equation}
+z_{r,i} = \frac{r'_i - \mu_{r,g}}{\sigma_{r,g} + \epsilon},
+\quad i \in g
+\label{eq:zscore}
+\end{equation}
+โดย $\mu_{r,g}, \sigma_{r,g}$ คือค่าเฉลี่ยและส่วนเบี่ยงเบนมาตรฐานของอัตราส่วน
+$r$ ในช่อง $g$ และ $\epsilon = 10^{-6}$ ป้องกันการหารด้วยศูนย์ ขั้นตอนนี้คือ
+\textbf{หัวใจ} ของการกำจัดอิทธิพลของขนาดช่องออกจากดัชนี
+
+\paragraph{ขั้นที่ 4: การถ่วงน้ำหนัก}
+\begin{equation}
+\mathit{VI}_i = w_e\,z_{\text{eng},i} + w_l\,z_{\text{like},i} + w_c\,z_{\text{cmt},i}
+\label{eq:vi}
+\end{equation}
+น้ำหนัก $w_e = 0.5$, $w_l = 0.3$, $w_c = 0.2$ ถูกเลือกเพื่อให้ engagement
+รวมมีน้ำหนักหลัก ตามด้วย like และ comment ตามลำดับ การ ablate น้ำหนักให้
+เท่ากันทำให้ ROC-AUC ลดลง 0.004 จึงคงน้ำหนักนี้
+
+\paragraph{ขั้นที่ 5: การจำแนกป้ายกำกับ}
+\begin{equation}
+y_i = \mathbb{1}\!\bigl[\mathit{VI}_i \geq Q_{0.9}^{(g)}(\mathit{VI})\bigr]
+\label{eq:label}
+\end{equation}
+โดย $Q_{0.9}^{(g)}$ คือเดไซล์ที่ 9 ของ $\mathit{VI}$ ในช่อง $g$ การใช้
+\emph{เดไซล์ภายในช่อง} แทน \emph{เดไซล์รวม} ทำให้ทุกช่องมีอัตราส่วนชั้นบวก
+\emph{ใกล้เคียงกัน} (10\%) และไม่มีช่องใดเป็น 100\% positive หรือ 0\%
+positive ลักษณะข้างต้นป้องกันการเรียนรู้ของแบบจำลองให้ใช้ ``ขนาดช่อง'' เป็น
+ตัวพยากรณ์เดียว
+
+\section{การแบ่งชุดข้อมูลแบบ Channel-Grouped + Time-Aware}
+\label{sec:method-split}
+
+การแบ่งข้อมูลผิดวิธีเป็น \emph{อันตรายต่อความถูกต้องของการประเมินผล}
+ที่สุดในงานพยากรณ์เนื้อหา เพราะข้อมูลมีโครงสร้างจัดกลุ่ม (channel) และ
+เคลื่อนไปตามเวลา (time-series) งานวิจัยนี้ใช้กลยุทธ์ผสม
+
+\subsection{Channel-Grouped (Train/Val)}
+
+ระหว่างชุดฝึก (train) และชุดตรวจสอบ (validation) เราใช้ \texttt{GroupShuffleSplit}
+โดย \texttt{group} = \texttt{channel\_id} เพื่อให้ \emph{ไม่มีช่องใดปรากฏ
+พร้อมกันในชุดฝึกและชุดตรวจสอบ} หลักการนี้ป้องกัน \emph{leakage} ของลักษณะ
+เฉพาะของแต่ละช่อง (เช่น ลายเซ็นภาษาของเจ้าของช่อง) ไปอยู่ในชุดตรวจสอบ
+
+\subsection{Time-Aware (Test)}
+
+ชุดทดสอบ (test) ถูกกำหนดเป็น \textbf{15\% หลังสุดของวิดีโอตาม \texttt{published\_at}}
+ของทั้งคลัง การออกแบบนี้จำลองสถานการณ์การใช้งานจริงที่แบบจำลองพยากรณ์วิดีโอ
+\emph{ในอนาคต} จากข้อมูลในอดีต โดยห้ามมีวิดีโอในชุดทดสอบที่เผยแพร่ก่อน
+วิดีโอในชุดฝึก/ตรวจสอบใด ๆ ของช่องเดียวกัน
+
+\subsection{การจัดการความไม่สมดุลของชั้นเฉพาะชุดฝึก}
+
+\textbf{เฉพาะชุดฝึก} ทำการ \emph{undersampling} ชั้นลบในอัตรา 3:1 เพื่อให้
+แบบจำลองเรียนรู้ขอบเขตการตัดสินใจอย่างสมดุล ชุดตรวจสอบและชุดทดสอบ
+\emph{คงอัตราส่วนตามธรรมชาติ} ไว้ที่ประมาณ 10\% เพื่อให้ตัวชี้วัดสะท้อนการ
+ใช้งานจริง
+
+\paragraph{การวิเคราะห์ Power และขนาดผลที่ตรวจจับได้ขั้นต่ำ}
+ขนาดชุดทดสอบ $n = 3{,}510$ ที่ pos rate $\pi = 0.0877$ ให้ค่าความ
+\emph{แปรปรวนเชิงทฤษฎี} ของ ROC-AUC ตามสูตร Hanley \& McNeil
+\begin{equation}
+\mathrm{Var}(\widehat{\mathrm{AUC}}) \approx \frac{A(1-A) + (n_+ - 1)(Q_1 - A^2) + (n_- - 1)(Q_2 - A^2)}{n_+ \cdot n_-}
+\label{eq:hanley-mcneil}
+\end{equation}
+โดย $A$ คือ AUC จริง, $Q_1 = A/(2-A)$, $Q_2 = 2A^2/(1+A)$ เมื่อแทน $A=0.69$
+และ $n_+ = 308$, $n_- = 3{,}202$ จะได้ $\sqrt{\mathrm{Var}} \approx 0.014$
+ซึ่งสอดคล้องกับ bootstrap CI 95\% ที่กว้างประมาณ $\pm 0.027$ ที่รายงานในบทที่
+\ref{ch:results} \emph{ขนาดผลขั้นต่ำที่ตรวจจับได้} (minimum detectable effect)
+ที่ $\alpha = 0.05$, power $= 0.8$ คือ $\Delta\mathrm{AUC} \approx 0.013$
+ระหว่างคู่แบบจำลอง ดังนั้นความแตกต่าง $\Delta = 0.019$ ระหว่าง stacking และ
+LightGBM-best มีนัยสำคัญ \emph{ทางสถิติเชิงโครงสร้าง} (powered) ไม่ใช่จาก
+McNemar's test เพียงอย่างเดียว
+
+ตารางที่ \ref{tab:split-stats} สรุปขนาดและอัตราส่วนชั้นบวกในแต่ละชุด สมการ
+ความสัมพันธ์ระหว่างขนาด \emph{ก่อน} และ \emph{หลัง} undersample คือ
+\begin{align}
+n_{\text{train (pre)}} &= n_{\text{corpus}} - n_{\text{val}} - n_{\text{test}}
+                       = 23{,}431 - 3{,}143 - 3{,}510 = 16{,}778 \\
+n_{\text{train (post)}} &= n_{\text{train,pos}} \cdot (1 + 3) = 1{,}741 \cdot 4 = 6{,}964 \\
+n_{\text{dropped}} &= 16{,}778 - 6{,}964 = 9{,}814
+\end{align}
+จึงเหลือ $n_{\text{kept}} = 13{,}617$ ในการฝึก/ตรวจสอบ/ทดสอบ ส่วน 9{,}814 ตัวอย่าง
+ที่ตกในขั้น undersample ถูก \emph{ทิ้ง} ก่อนการฝึกตามนโยบายการ rebalance
+ที่ใช้ใน \texttt{src/data\_processing/splits.py:\_undersample\_train()}
+ตัวอย่างที่ถูกทิ้งทั้งหมดเป็นชั้นลบและไม่ปรากฏในชุดตรวจสอบหรือชุดทดสอบ
+ของรายงานนี้
+
+\begin{table}[H]
+\centering
+\caption{ขนาดและอัตราส่วนชั้นบวกในแต่ละชุดข้อมูล ก่อนและหลัง undersampling}
+\label{tab:split-stats}
+\begin{tabularx}{\textwidth}{lrrXr}
+\toprule
+\textbf{ชุด} & \textbf{ขนาด} & \textbf{Positive (\%)} & \textbf{หมายเหตุ} & \textbf{การจัดการคลาส} \\
+\midrule
+Train (pre-undersample)   & 16{,}778 & 10.38\% & ใช้ก่อน rebalance & --- \\
+Train (post-undersample)  & 6{,}964  & 25.00\% & ratio 3:1 negative:positive & ใช่ \\
+Validation                & 3{,}143  & 9.79\%  & natural rate & ไม่ \\
+Test                      & 3{,}510  & 8.77\%  & latest 15\% by time & ไม่ \\
+\midrule
+Dropped during undersample & 9{,}814 & 0\%      & all negative class & --- \\
+\midrule
+\textbf{Total corpus}     & \textbf{23{,}431} & \textbf{10.16\%} & & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{การออกแบบและการสกัดฟีเจอร์}
+\label{sec:method-features}
+
+ฟีเจอร์ในงานวิจัยถูกแบ่งเป็น 4 กลุ่มอิสระ ที่สามารถรวมหรือใช้เดี่ยว ๆ ได้
+
+\subsection{ฟีเจอร์เชิงโครงสร้าง (Structural Features, 27 ตัว)}
+
+โมดูล \texttt{src/features/structural.py} สกัดฟีเจอร์จากข้อมูล meta-data ของ
+วิดีโอและช่อง โดยไม่อาศัยตัวแบบจำลองภาษา ฟีเจอร์ทั้ง 27 ตัวแบ่งเป็น
+3 ประเภท
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{ระดับวิดีโอ (12 ตัว):} \texttt{title\_length},
+        \texttt{title\_word\_count\_th}, \texttt{title\_emoji\_count},
+        \texttt{title\_caps\_ratio}, \texttt{title\_has\_question},
+        \texttt{title\_has\_exclamation}, \texttt{title\_digit\_count},
+        \texttt{title\_punct\_count}, \texttt{description\_length},
+        \texttt{tag\_count}, \texttt{duration\_seconds}, \texttt{has\_thumbnail\_face}
+  \item \textbf{ระดับช่อง (8 ตัว):} \texttt{channel\_subscribers} (log),
+        \texttt{channel\_video\_count} (log), \texttt{channel\_view\_count} (log),
+        \texttt{channel\_age\_days}, \texttt{channel\_upload\_frequency},
+        \texttt{channel\_avg\_engagement\_30d},
+        \texttt{channel\_avg\_engagement\_alltime}, \texttt{is\_verified}
+  \item \textbf{ระดับเวลา (7 ตัว):} \texttt{publish\_hour} (one-hot 0--23
+        แบบ cyclical sin/cos), \texttt{publish\_day\_of\_week} (cyclical),
+        \texttt{is\_weekend}, \texttt{is\_holiday\_th}, \texttt{day\_of\_month},
+        \texttt{month}, \texttt{quarter}
+\end{itemize}
+
+ทุกฟีเจอร์เชิงปริมาณถูก \emph{มาตรฐาน} (z-score) ก่อนป้อนเข้าแบบจำลองเชิง
+เส้น แต่ \emph{ไม่ scaling} ก่อนป้อนเข้า tree-based model
+
+\subsection{ฟีเจอร์เชิงอารมณ์ (Sentiment Features, 6 ตัว)}
+
+โมดูล \texttt{src/features/sentiment.py} ใช้ \texttt{wangchanberta-base-att-spm-uncased}
+ที่ปรับจูนบน Wisesight-Sentiment คาดการณ์อารมณ์ของชื่อวิดีโอเป็น 4 ระดับ
+(positive / neutral / negative / question) จากนั้นสกัดเป็น 6 ฟีเจอร์ ได้แก่
+ความน่าจะเป็นของแต่ละคลาส (4 ตัว) ค่า \emph{polarity} = $P(\text{pos}) - P(\text{neg})$
+และค่า \emph{arousal} = $P(\text{pos}) + P(\text{neg})$ ซึ่งสะท้อนระดับ
+ความตื่นเต้นของชื่อตามสมมติฐานของ Berger \& Milkman \cite{berger2012makes}
+ผลลัพธ์ถูก cache ไว้ที่ \texttt{data/interim/sentiment\_cache.parquet}
+
+\subsection{ฟีเจอร์ TF-IDF (Character N-gram)}
+
+โมดูล \texttt{src/features/tfidf.py} ใช้ \texttt{TfidfVectorizer} ของ
+scikit-learn ตั้งค่า \texttt{analyzer="char\_wb"}, \texttt{ngram\_range=(2,5)},
+\texttt{min\_df=5}, \texttt{max\_df=0.9}, \texttt{max\_features=20000}
+การใช้ character-level n-gram เลี่ยงปัญหาการตัดคำในภาษาไทย ผลคือเมทริกซ์
+sparse ขนาด $n_{\text{train}} \times 20000$ ใช้กับ Logistic Regression และ
+boosting tree เป็นชุดฟีเจอร์เสริม
+
+\subsection{ฟีเจอร์เวกเตอร์ฝังของชื่อ (Title Embeddings, 768 มิติ)}
+
+โมดูล \texttt{src/features/transformer\_embed.py} ใช้
+\texttt{paraphrase-multilingual-mpnet-base-v2} จาก SBERT \cite{reimers2020sbert}
+สกัด mean-pooled embedding ของชื่อวิดีโอเป็นเวกเตอร์ 768 มิติ ผลถูก cache ที่
+\texttt{data/interim/title\_embeddings.npy}
+
+\paragraph{หมายเหตุการตั้งชื่อชุดฟีเจอร์} ใน codebase, key
+\texttt{structured\_plus\_tfidf} ของ baseline LightGBM/XGBoost รวม
+\textbf{structured + title embeddings (768 มิติ)} (มิใช่ TF-IDF; ชื่อนี้คงไว้
+ตามสภาพ legacy ก่อนที่ pipeline จะถูก migrate ไปใช้ SBERT embeddings) สำหรับ
+ชุดฟีเจอร์ TF-IDF ดิบ ดู key \texttt{tfidf} (เช่น \texttt{lightgbm\_tfidf},
+\texttt{logistic\_regression\_tfidf}) ส่วน MLP/GBM ของ \texttt{hybrid/*} ใช้
+embedding ทั้ง 768 มิติเช่นกัน รายงาน SHAP top-10 ใน \S\ref{sec:results-xai}
+สะท้อนการค้นพบนี้ — มิติ \texttt{emb\_*} หลายตัวติดอันดับสูง
+
+\section{แบบจำลองพื้นฐาน}
+\label{sec:method-baselines}
+
+แบบจำลองพื้นฐาน 3 ตัว ฝึกบน 4 ชุดฟีเจอร์ ทำให้มีรวม 12 baseline runs
+ตามตารางที่ \ref{tab:baseline-grid}
+
+\begin{table}[H]
+\centering
+\caption{ตารางการรัน baseline (algorithm $\times$ feature set)}
+\label{tab:baseline-grid}
+\begin{tabularx}{\textwidth}{l|XXXX}
+\toprule
+& \textbf{Structured} & \textbf{TF-IDF} & \textbf{Struct+TF-IDF} & \textbf{+Channel-prior} \\
+\midrule
+Logistic Regression & \checkmark & \checkmark & \checkmark & \\
+LightGBM            & \checkmark & \checkmark & \checkmark & \\
+XGBoost             & \checkmark & \checkmark & \checkmark & \\
+Channel-prior baseline & & & & \checkmark \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Channel-prior baseline} เป็นแบบจำลองอย่างง่ายสุดที่พยากรณ์เป็นค่าเฉลี่ย
+ของอัตราส่วนชั้นบวกของช่องในชุดฝึก ใช้เป็น sanity check การได้ ROC-AUC
+$\approx$ 0.5 บน test ยืนยันว่าการแบ่งข้อมูลของเราป้องกันการ leak
+\texttt{channel\_id} จริง
+
+ค่าไฮเปอร์พารามิเตอร์ของแบบจำลองอยู่ใน \texttt{configs/train.yaml} โดย
+LightGBM และ XGBoost ใช้ \texttt{n\_estimators=500}, \texttt{learning\_rate=0.05},
+\texttt{num\_leaves=31}, \texttt{min\_child\_samples=20},
+\texttt{reg\_alpha=0.1}, \texttt{reg\_lambda=0.1} และ Logistic Regression
+ใช้ \texttt{C=1.0}, \texttt{class\_weight="balanced"}, \texttt{max\_iter=2000}
+
+\section{การปรับจูนทรานส์ฟอร์เมอร์ภาษาไทย}
+\label{sec:method-transformers}
+
+\subsection{แบบจำลองที่เปรียบเทียบ}
+
+\begin{table}[H]
+\centering
+\caption{แบบจำลองทรานส์ฟอร์เมอร์ที่เปรียบเทียบ}
+\label{tab:transformers}
+\begin{tabularx}{\textwidth}{lXrr}
+\toprule
+\textbf{Alias} & \textbf{Hugging Face name} & \textbf{Params} & \textbf{Vocab} \\
+\midrule
+\texttt{wangchanberta} & \texttt{airesearch/wangchanberta-base-att-spm-uncased} & 105M & 25{,}000 \\
+\texttt{phayathaibert} & \texttt{clicknext/phayathaibert} & 278M & 250{,}000 \\
+\texttt{xlm-roberta-large} & \texttt{FacebookAI/xlm-roberta-large} & 560M & 250{,}000 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Wrapper เดียวสำหรับทั้งสามแบบจำลอง}
+
+ตามกฎด้าน Research Engineering ที่กำหนดใน \texttt{.claude/rules/research-engineering.md}
+ทั้งสามแบบจำลองใช้ \emph{Trainer wrapper เดียวกัน} (ฟังก์ชัน
+\texttt{\_build\_trainer\_full\_ft} ใน \texttt{src/models/transformer\_finetune.py})
+เพื่อให้การเปรียบเทียบยุติธรรม สิ่งที่แตกต่างมีเพียง
+
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{batch\_size}: 32 (WangchanBERTa), 16 (PhayaThaiBERT), 8 (XLM-R-large)
+  \item \texttt{gradient\_accumulation\_steps}: 1, 2, 4 ตามลำดับ (effective batch
+        size = 32 ทุกตัว)
+  \item \texttt{gradient\_checkpointing}: เปิดเฉพาะ XLM-R-large เพื่อจัดการ VRAM
+  \item \texttt{learning\_rate}: $2\!\times\!10^{-5}$ ทุกตัว ตามมาตรฐาน BERT-style
+        \cite{devlin2019bert}
+\end{itemize}
+
+ค่าตั้งค่าอื่น ๆ ที่ใช้ร่วมกัน ได้แก่ \texttt{max\_length=128} (เพราะชื่อวิดีโอ
+ภาษาไทยส่วนใหญ่สั้น), \texttt{epochs=3}, \texttt{warmup\_ratio=0.06},
+\texttt{weight\_decay=0.01}, \texttt{eval\_strategy=epoch},
+\texttt{load\_best\_model\_at\_end=True}, \texttt{metric\_for\_best\_model=eval\_roc\_auc},
+\texttt{early\_stopping\_patience=2}
+
+\subsection{ฟังก์ชันความสูญเสีย}
+
+ทุกแบบจำลองใช้ \texttt{cross\_entropy} แบบมาตรฐาน เนื่องจากการ undersample
+ในชุดฝึกได้สมดุลคลาสไปแล้ว การทดลองเพิ่มเติมด้วย Focal Loss \cite{lin2017focal}
+($\gamma = 2.0$) ไม่ได้ให้ผลดีกว่า ดังที่จะรายงานใน Section
+\ref{sec:results-ablation}
+
+\subsection{Mixed Precision และ Gradient Checkpointing}
+
+การปรับจูนใช้ \emph{fp16 mixed precision} เมื่อมี CUDA เพื่อเร่งความเร็ว
+$\sim$2--3 เท่า การทดลองเริ่มแรกบน Apple M1 (MPS) พบว่า fp16/bf16 ให้
+NaN logits ในบางสถาปัตยกรรม จึงใส่ฟังก์ชัน \texttt{\_has\_cuda()} ใน
+\texttt{src/models/transformer\_finetune.py} เพื่อปิด mixed precision
+อัตโนมัติเมื่อไม่ใช่ CUDA
+
+\subsection{การฝึกบนคลาวด์ (Hugging Face Jobs)}
+
+เนื่องจาก M1 (8GB unified) ไม่เพียงพอสำหรับ PhayaThaiBERT และ XLM-R-large
+และคิว Kaggle Free GPU ขณะดำเนินงานยาวเกิน 6 ชั่วโมง คณะผู้วิจัยจึงย้ายการ
+ฝึกไปยัง Hugging Face Jobs ที่จองได้ทันที ค่าใช้จ่ายต่อชั่วโมงอยู่ที่
+\$0.40 (T4-small) และ \$1.00 (A10G-small) รวมค่าใช้จ่ายของวิทยานิพนธ์นี้
+ประมาณ \$0.50 (ต่ำกว่าค่าธรรมเนียมเอกสารการพิมพ์)
+
+ขั้นตอนถูกบรรจุใน \texttt{scripts/cloud/run\_on\_hf\_jobs.py} และ
+\texttt{scripts/cloud/build\_hf\_dataset.py} ข้อมูลและผลลัพธ์ถูก stage ผ่าน
+private Hugging Face Datasets ที่จัดเตรียมโดยคณะผู้วิจัย (ทั้ง input dataset
+และ per-model output datasets) ภายใต้สิทธิ์เข้าถึงเฉพาะคณะผู้วิจัยและอาจารย์
+ที่ปรึกษา
+
+\paragraph{เวลาในการฝึกและต้นทุน}
+ตารางที่ \ref{tab:walltime} สรุปเวลาฝึก wall-time และต้นทุน USD ของ encoder
+fine-tuning แต่ละตัว ค่า GPU-hour อิงจากใบเสร็จของ Hugging Face Jobs
+(\texttt{billing.huggingface.co}) ส่วนต้นทุนรวมของวิทยานิพนธ์อยู่ที่ประมาณ
+\$0.50 USD ซึ่งต่ำกว่าค่าธรรมเนียมการพิมพ์เล่ม
+
+\begin{table}[H]
+\centering
+\caption{เวลาฝึก (wall-time) และต้นทุนของ encoder fine-tuning บน Hugging Face Jobs}
+\label{tab:walltime}
+\begin{tabularx}{\textwidth}{lXrrr}
+\toprule
+\textbf{Model} & \textbf{Hardware} & \textbf{Wall-time (min)} & \textbf{Rate (USD/h)} & \textbf{Cost (USD)} \\
+\midrule
+WangchanBERTa     & T4-small (16 GB)   & 14 & 0.40 & 0.09 \\
+PhayaThaiBERT     & A10G-small (24 GB) & 11 & 1.00 & 0.18 \\
+XLM-RoBERTa-large & A10G-small (24 GB) & 13 & 1.00 & 0.22 \\
+\midrule
+\textbf{รวม}      &                    & 38 &      & \textbf{\$0.49} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{แบบจำลองไฮบริด (MLP + LightGBM)}
+
+แบบจำลอง \texttt{hybrid\_mlp} เป็น MLP สามชั้น (768$\to$256$\to$64$\to$2)
+รับ input เป็น \texttt{title\_embedding} (768) ต่อด้วยฟีเจอร์โครงสร้าง 27 ตัว
+ใช้ \texttt{ReLU} activation และ \texttt{dropout=0.3} ฝึกด้วย Adam ($\eta = 10^{-3}$)
+20 epoch แบบจำลอง \texttt{hybrid\_gbm} เป็น LightGBM ตัวเดียวกันแต่บน feature
+รวมเดียวกัน ทั้งสองทำหน้าที่เป็นตัวเลือกของ ``หัว'' (head) ที่นำเข้า ensemble
+
+\section{การประกอบและการปรับเทียบ}
+\label{sec:method-stacking}
+
+\subsection{สถาปัตยกรรม Stacking}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.55cm and 0.7cm,
+  base/.style={rectangle,draw,rounded corners,fill=blue!8,minimum width=4cm,minimum height=0.55cm,font=\footnotesize},
+  meta/.style={rectangle,draw,rounded corners,fill=red!15,minimum width=3cm,minimum height=0.7cm,font=\small},
+  outbox/.style={rectangle,draw,rounded corners,fill=green!15,minimum width=3cm,minimum height=0.7cm,font=\small},
+  arr/.style={-{Stealth[length=2mm]}}
+]
+\node[base] (m1) {LR (struct)};
+\node[base,below=of m1] (m2) {LR (TF-IDF)};
+\node[base,below=of m2] (m3) {LR (struct+TF-IDF)};
+\node[base,below=of m3] (m4) {LightGBM (struct)};
+\node[base,below=of m4] (m5) {LightGBM (TF-IDF)};
+\node[base,below=of m5] (m6) {LightGBM (struct+TF-IDF)};
+\node[base,below=of m6] (m7) {XGBoost (struct)};
+\node[base,below=of m7] (m8) {XGBoost (TF-IDF)};
+\node[base,below=of m8] (m9) {XGBoost (struct+TF-IDF)};
+\node[base,below=of m9] (m10) {Channel-prior};
+\node[base,below=of m10] (m11) {Hybrid MLP};
+\node[base,below=of m11] (m12) {Hybrid GBM};
+\node[base,below=of m12] (m13) {WangchanBERTa};
+\node[base,below=of m13] (m14) {PhayaThaiBERT};
+\node[base,below=of m14] (m15) {XLM-RoBERTa-large};
+\node[meta,right=2.5cm of m8] (lr) {Meta-LR\\(C=1.0)};
+\node[outbox,right=of lr] (cal) {Platt\\calibrator};
+\node[outbox,right=of cal] (final) {Final\\probability};
+\foreach \i in {1,...,15} { \draw[arr] (m\i.east) -- (lr.west); }
+\draw[arr] (lr) -- (cal);
+\draw[arr] (cal) -- (final);
+\end{tikzpicture}
+\caption{สถาปัตยกรรมของ stacking ensemble ที่ปรับเทียบด้วย Platt scaling
+แบบจำลองฐาน 15 ตัวให้ความน่าจะเป็นบนชุด validation ซึ่ง meta-LR เรียนรู้
+น้ำหนักรวม จากนั้น Platt calibrator ปรับ output สุดท้ายให้สะท้อนความน่าจะเป็น
+จริง}
+\label{fig:stacking}
+\end{figure}
+
+โมดูล \texttt{scripts/train\_stacking.py} อ่านไฟล์ \texttt{predictions/*.parquet}
+ของแบบจำลองฐานทั้งหมด รวม 15 ตัว สร้างเมทริกซ์ความน่าจะเป็นบน \emph{ชุด
+validation} ($X_{\text{meta}}^{\text{val}} \in \mathbb{R}^{n_{\text{val}} \times 15}$)
+แล้วฝึก meta-LR:
+\begin{equation}
+\hat p = \sigma\!\left(\sum_{j=1}^{15} \beta_j \, p_{ij} + \beta_0\right),
+\qquad i \in \text{val}
+\label{eq:metalr}
+\end{equation}
+ตั้งค่า \texttt{C=1.0}, \texttt{class\_weight="balanced"} หลังจากนั้น
+ทำนายบนชุดทดสอบโดยใช้ค่า $p_{ij}$ ของแต่ละตัวอย่างในชุดทดสอบเช่นกัน
+
+\subsection{การปรับเทียบความน่าจะเป็น}
+
+หลังจากได้ probability จาก meta-LR เราปรับเทียบด้วย 2 วิธี
+
+\paragraph{Platt Scaling} ใช้ \texttt{CalibratedClassifierCV(method="sigmoid",
+cv="prefit")} โดย calibrator ถูกฝึกบน validation set เดียวกัน
+
+\paragraph{Isotonic Regression} ใช้ \texttt{CalibratedClassifierCV(method="isotonic",
+cv="prefit")}
+
+ผลการเปรียบเทียบทั้งสองวิธีรายงานในตารางที่ \ref{tab:calib-summary} (บทที่
+\ref{ch:results}) เราเลือก \textbf{Platt} เป็นค่าตั้งต้น เพราะให้ ECE
+ใกล้เคียงกับ isotonic แต่ \emph{ไม่ overfit} เมื่อ validation set มีจำกัด
+
+\section{ระเบียบการประเมินผล}
+\label{sec:method-eval}
+
+\subsection{ตัวชี้วัด}
+
+ตัวชี้วัดทั้งหมดที่รายงานคำนวณจาก confusion matrix ที่ threshold $\theta$
+ที่เลือกบน validation:
+\begin{align}
+\text{Accuracy}     &= \frac{TP + TN}{TP + TN + FP + FN} \label{eq:acc}\\
+\text{Precision}_{+} &= \frac{TP}{TP + FP} \label{eq:prec}\\
+\text{Recall}_{+}    &= \frac{TP}{TP + FN} \label{eq:recall}\\
+\text{F1}_{+}        &= 2 \cdot \frac{\text{Precision}_{+} \cdot \text{Recall}_{+}}{\text{Precision}_{+} + \text{Recall}_{+}} \label{eq:f1}\\
+\text{MCC}           &= \frac{TP \cdot TN - FP \cdot FN}{\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}} \label{eq:mcc}
+\end{align}
+\textbf{ROC-AUC} คำนวณเป็น $\Pr\!\bigl[\hat p_+ > \hat p_-\bigr]$ โดย $\hat p_+, \hat p_-$
+เป็นความน่าจะเป็นของตัวอย่างชั้นบวกและชั้นลบที่สุ่มมา และ \textbf{PR-AUC}
+คำนวณเป็นพื้นที่ใต้กราฟ Precision-Recall ตามนิยามของ Davis \& Goadrich
+
+ตัวชี้วัดที่รายงานสำหรับทุกแบบจำลอง
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{ROC-AUC} (พื้นที่ใต้กราฟ ROC) เป็นตัวชี้วัดหลัก ทนต่อ
+        ความไม่สมดุลของชั้น
+  \item \textbf{PR-AUC} (พื้นที่ใต้กราฟ Precision-Recall) สะท้อนการพยากรณ์
+        ชั้นน้อยได้ดีกว่า ROC-AUC ในกรณีไม่สมดุลสูง
+  \item \textbf{F1 ของชั้นบวก} (\texttt{f1\_pos}) ที่ threshold ที่ optimal
+        บน validation
+  \item \textbf{Precision, Recall ของชั้นบวก} แยกรายงาน
+  \item \textbf{Matthews Correlation Coefficient (MCC)} ตัวชี้วัดที่
+        balanced ทั้งสี่ช่องของ confusion matrix
+  \item \textbf{Accuracy} (อ้างอิง) แต่ไม่ถือเป็นเกณฑ์หลัก
+\end{itemize}
+
+\subsection{Bootstrap Confidence Intervals}
+
+ใช้ stratified bootstrap 1{,}000 sample ที่ \texttt{n\_iter=1000},
+\texttt{random\_state=42} ผ่านฟังก์ชัน \texttt{bootstrap\_ci()} ใน
+\texttt{src/evaluation/metrics.py} ค่าที่รายงานเป็น (point estimate, $CI_{0.025}$,
+$CI_{0.975}$) ตามวิธี percentile
+
+\subsection{การเลือก Threshold}
+
+Threshold ของแต่ละแบบจำลองถูกเลือกบน \emph{validation} โดยสแกน
+$\theta \in \{0.01, 0.02, \ldots, 0.99\}$ และเลือกค่าที่ maximise F1 ของ
+ชั้นบวก จากนั้นใช้ threshold เดียวกันบน test เพื่อคำนวณ confusion matrix
+
+\subsection{การทดสอบทางสถิติ}
+
+\paragraph{McNemar's Test (Pairwise)}
+ทำการทดสอบทุกคู่ที่สนใจ ในงานปัจจุบันรายงาน 3 คู่หลัก
+(stacking vs LightGBM-best, encoder vs encoder, encoder vs baseline) สมการ
+\eqref{eq:mcnemar} กับ continuity correction ของ Edwards เมื่อ $n_{01} + n_{10} < 25$
+
+\paragraph{Cochran's Q (Multi-classifier)}
+รายงาน 2 ระดับ คือ ระหว่างทรานส์ฟอร์เมอร์ทั้งสาม และระหว่างแบบจำลอง 22 ตัว
+ทั้งหมด สมการ \eqref{eq:cochranq}
+
+\paragraph{ECE ของการปรับเทียบ}
+แบ่งช่วง confidence เป็น 15 bins (\texttt{n\_bins=15}) ตามมาตรฐาน Naeini
+et~al.\ \cite{naeini2015obtaining}
+
+\subsection{การวิเคราะห์ความผิดพลาด}
+
+โมดูล \texttt{scripts/evaluate.py} เก็บ top-50 false positive และ top-50
+false negative เรียงตามคะแนนความมั่นใจ ออกเป็น CSV ที่ \texttt{reports/tables/errors\_*.csv}
+สำหรับการวิเคราะห์เชิงคุณภาพในบทที่ \ref{ch:results}
+
+\subsection{การวิเคราะห์เชิงกลุ่มย่อย (Sub-population)}
+
+แบ่งชุดทดสอบตาม (1) หมวดหมู่ YouTube (Entertainment, Gaming, Music) และ
+(2) ขนาดช่อง (mid 100k--1M, large 1M+) แล้วคำนวณ ROC-AUC พร้อม CI ของ
+แต่ละกลุ่มย่อย เพื่อตรวจสอบความเสมอภาคของแบบจำลอง
+
+\section{การวิเคราะห์ความสามารถในการอธิบาย}
+\label{sec:method-xai}
+
+\subsection{SHAP บน LightGBM-best}
+
+ใช้ \texttt{TreeExplainer} ของ \texttt{shap} library กับ
+\texttt{lightgbm\_structured\_plus\_tfidf} ซึ่งเป็น single best baseline
+รายงาน global importance (mean absolute SHAP value) ของ 27 structured
+features และ top-50 character-n-gram
+
+\subsection{LIME บนทรานส์ฟอร์เมอร์}
+
+ใช้ \texttt{lime.lime\_text.LimeTextExplainer} กับ PhayaThaiBERT ที่ปรับจูน
+แล้ว สุ่ม 50 ตัวอย่างจากชุดทดสอบ (25 ทำนายถูก / 25 ทำนายผิด) และเก็บ
+local explanation พร้อม HTML report
+
+\subsection{Attention Rollout}
+
+ใช้สูตร \eqref{eq:attnroll} กับ PhayaThaiBERT รายงานเป็น token-level
+heatmap สำหรับ 20 ตัวอย่างที่เลือกแสดง
+
+\section{การทดลองเสริมและการ Ablation}
+\label{sec:method-ablation}
+
+เพื่อตรวจสอบความสำคัญของแต่ละองค์ประกอบ ทำการ ablate ดังนี้
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Sentiment Ablation:} ฝึก LightGBM บน (a) structured
+        เท่านั้น (b) structured + sentiment (c) sentiment เท่านั้น
+        เปรียบเทียบ ROC-AUC
+  \item \textbf{Multi-field PhayaThaiBERT:} ฝึก PhayaThaiBERT บน
+        \texttt{title} เทียบกับ \texttt{title [SEP] description [SEP] channel\_title}
+        เพื่อดูว่าข้อมูลข้อความเสริมช่วยหรือเปล่า
+  \item \textbf{HPO PhayaThaiBERT:} ลอง 3 hyperparameter combinations
+        ($\eta = 10^{-5}, ep = 6$), ($\eta = 2\!\times\!10^{-5}, ep = 4$),
+        ($\eta = 5\!\times\!10^{-6}, ep = 6$)
+  \item \textbf{Drop-one Stacking Ablation:} เอาแบบจำลองฐานออกทีละตัว
+        แล้วเทรน meta-LR ใหม่ เพื่อวัดความสำคัญของแต่ละแบบจำลองในการประกอบ
+\end{itemize}
+
+\section{สมรรถนะที่ทำซ้ำได้และการบันทึก}
+\label{sec:method-repro}
+
+ตามกฎใน \texttt{.claude/rules/reproducibility.md}: ทุกสคริปต์ตั้งค่า
+\texttt{PYTHONHASHSEED=42}, \texttt{np.random.seed(42)}, \texttt{torch.manual\_seed(42)},
+\texttt{transformers.set\_seed(42)}, \texttt{torch.backends.cudnn.deterministic=True}
+ทุก run บันทึกใน MLflow (\texttt{file:./mlruns}) พร้อม
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{mlflow.log\_params(cfg\_flat)} — config ที่ flatten แล้ว
+  \item \texttt{mlflow.set\_tag("git\_sha", ...)} — sha ของ commit ปัจจุบัน
+  \item \texttt{mlflow.set\_tag("dataset\_hash", ...)} — sha256 ของ
+        \texttt{data/processed/dataset\_with\_labels.parquet}
+  \item \texttt{mlflow.log\_metric} — ทุก metric ทุก epoch
+  \item \texttt{mlflow.log\_artifact} — predictions parquet, calibration
+        plot, confusion matrix
+\end{itemize}
+ผลคือทุกตัวเลขในบทที่ \ref{ch:results} สามารถ reproduce ได้จากคำสั่ง
+\texttt{git checkout <sha> \&\& make prepare \&\& make eval}

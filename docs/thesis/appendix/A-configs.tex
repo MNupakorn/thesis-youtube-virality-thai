@@ -1,0 +1,149 @@
+% appendix/A-configs.tex
+\chapter{ค่าตั้งค่า (Configs) ของระบบ}
+\label{app:configs}
+
+ภาคผนวกนี้รวมไฟล์ \texttt{configs/*.yaml} ที่ใช้ในการรัน pipeline ทั้งหมด
+เนื้อหาทุกบรรทัดสามารถ reproduce ได้จาก git SHA ที่บันทึกไว้ใน MLflow
+
+\section{configs/data.yaml}
+\begin{lstlisting}[language=yaml,caption={configs/data.yaml -- การกำหนดแหล่งข้อมูลและการแบ่ง},label={lst:cfg-data}]
+data:
+  raw_path: data/raw/youtube_thai_videos.parquet
+  processed_path: data/processed/dataset_with_labels.parquet
+  collection:
+    api_version: v3
+    snapshot_date: 2026-04-30
+    min_subscribers: 100000
+    target_categories: [10, 20, 24]  # Music, Gaming, Entertainment
+  split:
+    method: channel_grouped_time_aware
+    test_ratio: 0.15
+    test_strategy: latest_by_published_at
+    val_ratio: 0.225          # 0.225 of (train + val)
+    train_undersample_ratio: 3
+    val_test_keep_natural: true
+    random_state: 42
+\end{lstlisting}
+
+\section{configs/features.yaml}
+\begin{lstlisting}[language=yaml,caption={configs/features.yaml -- การออกแบบฟีเจอร์},label={lst:cfg-features}]
+features:
+  structural:
+    enabled: true
+    n_features: 27
+  sentiment:
+    enabled: true
+    model: airesearch/wangchanberta-base-att-spm-uncased
+    finetuned_on: wisesight-sentiment
+    cache_path: data/interim/sentiment_cache.parquet
+  tfidf:
+    enabled: true
+    analyzer: char_wb
+    ngram_range: [2, 5]
+    min_df: 5
+    max_df: 0.9
+    max_features: 20000
+  embeddings:
+    enabled: true
+    model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+    cache_path: data/interim/title_embeddings.npy
+    pooling: mean
+\end{lstlisting}
+
+\section{configs/train.yaml}
+\begin{lstlisting}[language=yaml,caption={configs/train.yaml -- การฝึกแบบจำลอง},label={lst:cfg-train}]
+global:
+  seed: 42
+  artifacts_dir: reports/artifacts
+  mlflow_experiment: thesis-virality-thai
+
+baselines:
+  logistic_regression:
+    C: 1.0
+    class_weight: balanced
+    max_iter: 2000
+  lightgbm:
+    n_estimators: 500
+    learning_rate: 0.05
+    num_leaves: 31
+    min_child_samples: 20
+    reg_alpha: 0.1
+    reg_lambda: 0.1
+  xgboost:
+    n_estimators: 500
+    learning_rate: 0.05
+    max_depth: 6
+    min_child_weight: 5
+    reg_alpha: 0.1
+    reg_lambda: 0.1
+
+transformers:
+  shared:
+    text_cols: title
+    max_length: 128
+    epochs: 3
+    learning_rate: 2.0e-5
+    weight_decay: 0.01
+    warmup_ratio: 0.06
+    eval_strategy: epoch
+    save_total_limit: 2
+    early_stopping_patience: 2
+    metric_for_best_model: eval_roc_auc
+    loss: cross_entropy
+    precision: fp16
+  wangchanberta:
+    pretrained_name: airesearch/wangchanberta-base-att-spm-uncased
+    batch_size: 32
+    grad_accumulation: 1
+    gradient_checkpointing: false
+  phayathaibert:
+    pretrained_name: clicknext/phayathaibert
+    batch_size: 16
+    grad_accumulation: 2
+    gradient_checkpointing: false
+  xlm-roberta-large:
+    pretrained_name: FacebookAI/xlm-roberta-large
+    batch_size: 8
+    grad_accumulation: 4
+    gradient_checkpointing: true
+
+hybrid:
+  mlp:
+    hidden: [256, 64]
+    dropout: 0.3
+    activation: relu
+    epochs: 20
+    learning_rate: 1.0e-3
+    weight_decay: 1.0e-4
+  gbm:
+    n_estimators: 300
+    num_leaves: 15
+    min_child_samples: 30
+\end{lstlisting}
+
+\section{configs/eval.yaml}
+\begin{lstlisting}[language=yaml,caption={configs/eval.yaml -- การประเมินผล},label={lst:cfg-eval}]
+eval:
+  bootstrap:
+    n_iter: 1000
+    random_state: 42
+    method: percentile
+  threshold:
+    metric: f1_pos
+    scan: linspace(0.01, 0.99, 99)
+  calibration:
+    n_bins: 15
+    methods: [none, platt, isotonic]
+  statistical_tests:
+    mcnemar:
+      correction: continuity
+    cochran_q: true
+  subpopulation:
+    by_category: true
+    by_channel_size: true
+    buckets:
+      - {name: mid 100k-1M, min: 100000, max: 1000000}
+      - {name: large 1M+,   min: 1000000, max: null}
+  error_analysis:
+    top_k: 50
+\end{lstlisting}

@@ -1,0 +1,456 @@
+% references.bib — BibLaTeX entries for the thesis
+
+% ── Foundational transformer / NLP papers ───────────────────────────
+@inproceedings{vaswani2017attention,
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and
+               Jones, Llion and Gomez, Aidan N. and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  title     = {Attention Is All You Need},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  date      = {2017},
+  volume    = {30},
+  pages     = {5998--6008}
+}
+
+@inproceedings{devlin2019bert,
+  author    = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  title     = {{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding},
+  booktitle = {Proceedings of NAACL-HLT},
+  date      = {2019},
+  pages     = {4171--4186}
+}
+
+@article{liu2019roberta,
+  author    = {Liu, Yinhan and Ott, Myle and Goyal, Naman and Du, Jingfei and Joshi, Mandar and
+               Chen, Danqi and Levy, Omer and Lewis, Mike and Zettlemoyer, Luke and Stoyanov, Veselin},
+  title     = {{RoBERTa}: A Robustly Optimized {BERT} Pretraining Approach},
+  journaltitle = {arXiv preprint},
+  date      = {2019},
+  eprint    = {1907.11692}
+}
+
+@inproceedings{conneau2020xlmr,
+  author    = {Conneau, Alexis and Khandelwal, Kartikay and Goyal, Naman and Chaudhary, Vishrav and
+               Wenzek, Guillaume and Guzm\'an, Francisco and Grave, \'Edouard and Ott, Myle and
+               Zettlemoyer, Luke and Stoyanov, Veselin},
+  title     = {Unsupervised Cross-Lingual Representation Learning at Scale},
+  booktitle = {Proceedings of ACL},
+  date      = {2020},
+  pages     = {8440--8451}
+}
+
+@inproceedings{reimers2020sbert,
+  author    = {Reimers, Nils and Gurevych, Iryna},
+  title     = {Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation},
+  booktitle = {Proceedings of EMNLP},
+  date      = {2020}
+}
+
+% ── Thai NLP models ─────────────────────────────────────────────────
+@article{lowphansirikul2021wangchanberta,
+  author    = {Lowphansirikul, Lalita and Polpanumas, Charin and Jantrakulchai, Nawat and
+               Nutanong, Sarana},
+  title     = {{WangchanBERTa}: Pretraining transformer-based {Thai} Language Models},
+  journaltitle = {arXiv preprint},
+  date      = {2021},
+  eprint    = {2101.09635}
+}
+
+@misc{phayathaibert2023,
+  author       = {{CLICKNEXT AI Research}},
+  title        = {{PhayaThaiBERT}: A Large Thai Pretrained Language Model},
+  date         = {2023},
+  howpublished = {Hugging Face Hub, \url{https://huggingface.co/clicknext/phayathaibert}}
+}
+
+@inproceedings{phatthiyaphaibun2016thainlp,
+  author    = {Phatthiyaphaibun, Wannaphong and Chaovavanich, Korakot and Polpanumas, Charin and
+               Suriyawongkul, Arthit and Lowphansirikul, Lalita and Chormai, Pattarawat},
+  title     = {{PyThaiNLP}: Thai Natural Language Processing in Python},
+  booktitle = {Proceedings of the 2nd Workshop on Resources and Tools for Southeast Asian NLP},
+  date      = {2016}
+}
+
+@inproceedings{suriyawongkul2019wisesight,
+  author    = {Suriyawongkul, Arthit and Chuangsuwanich, Ekapol and Chormai, Pattarawat and Polpanumas, Charin},
+  title     = {{Wisesight} Sentiment Corpus: Social Media Sentiment Analysis Dataset for {Thai}},
+  booktitle = {Proceedings of the Workshop on Thai NLP},
+  date      = {2019}
+}
+
+% ── PEFT and decoder LLMs ───────────────────────────────────────────
+@inproceedings{hu2022lora,
+  author    = {Hu, Edward J. and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and
+               Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+  title     = {{LoRA}: Low-Rank Adaptation of Large Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  date      = {2022}
+}
+
+@inproceedings{dettmers2023qlora,
+  author    = {Dettmers, Tim and Pagnoni, Artidoro and Holtzman, Ari and Zettlemoyer, Luke},
+  title     = {{QLoRA}: Efficient Finetuning of Quantized {LLM}s},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  date      = {2023}
+}
+
+@article{touvron2023llama,
+  author    = {Touvron, Hugo and Lavril, Thibaut and Izacard, Gautier and Martinet, Xavier and
+               Lachaux, Marie-Anne and Lacroix, Timoth\'ee and others},
+  title     = {{LLaMA}: Open and Efficient Foundation Language Models},
+  journaltitle = {arXiv preprint},
+  date      = {2023},
+  eprint    = {2302.13971}
+}
+
+@inproceedings{wei2022emergent,
+  author    = {Wei, Jason and Tay, Yi and Bommasani, Rishi and Raffel, Colin and Zoph, Barret and
+               Borgeaud, Sebastian and others},
+  title     = {Emergent Abilities of Large Language Models},
+  booktitle = {Transactions on Machine Learning Research (TMLR)},
+  date      = {2022}
+}
+
+@inproceedings{howard2018ulmfit,
+  author    = {Howard, Jeremy and Ruder, Sebastian},
+  title     = {Universal Language Model Fine-tuning for Text Classification},
+  booktitle = {Proceedings of ACL},
+  date      = {2018}
+}
+
+% ── Gradient boosting and classical ML ──────────────────────────────
+@inproceedings{chen2016xgboost,
+  author    = {Chen, Tianqi and Guestrin, Carlos},
+  title     = {{XGBoost}: A Scalable Tree Boosting System},
+  booktitle = {Proceedings of ACM SIGKDD},
+  date      = {2016},
+  pages     = {785--794}
+}
+
+@inproceedings{ke2017lightgbm,
+  author    = {Ke, Guolin and Meng, Qi and Finley, Thomas and Wang, Taifeng and Chen, Wei and
+               Ma, Weidong and Ye, Qiwei and Liu, Tie-Yan},
+  title     = {{LightGBM}: A Highly Efficient Gradient Boosting Decision Tree},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  date      = {2017}
+}
+
+@article{sparckjones1972tfidf,
+  author    = {Sparck Jones, Karen},
+  title     = {A Statistical Interpretation of Term Specificity and Its Application in Retrieval},
+  journaltitle = {Journal of Documentation},
+  date      = {1972},
+  volume    = {28},
+  number    = {1},
+  pages     = {11--21}
+}
+
+@inproceedings{cheng2016widedeep,
+  author    = {Cheng, Heng-Tze and Koc, Levent and Harmsen, Jeremiah and Shaked, Tal and
+               Chandra, Tushar and Aradhye, Hrishi and others},
+  title     = {Wide \& Deep Learning for Recommender Systems},
+  booktitle = {Proceedings of the 1st Workshop on Deep Learning for Recommender Systems},
+  date      = {2016}
+}
+
+% ── Ensembling and stacking ─────────────────────────────────────────
+@article{wolpert1992stacked,
+  author       = {Wolpert, David H.},
+  title        = {Stacked Generalization},
+  journaltitle = {Neural Networks},
+  date         = {1992},
+  volume       = {5},
+  number       = {2},
+  pages        = {241--259}
+}
+
+@article{breiman1996stacked,
+  author       = {Breiman, Leo},
+  title        = {Stacked Regressions},
+  journaltitle = {Machine Learning},
+  date         = {1996},
+  volume       = {24},
+  number       = {1},
+  pages        = {49--64}
+}
+
+@article{bell2007lessons,
+  author       = {Bell, Robert M. and Koren, Yehuda},
+  title        = {Lessons from the {Netflix} Prize Challenge},
+  journaltitle = {ACM SIGKDD Explorations},
+  date         = {2007},
+  volume       = {9},
+  number       = {2},
+  pages        = {75--79}
+}
+
+% ── Class imbalance ─────────────────────────────────────────────────
+@article{chawla2002smote,
+  author       = {Chawla, Nitesh V. and Bowyer, Kevin W. and Hall, Lawrence O. and Kegelmeyer, W. Philip},
+  title        = {{SMOTE}: Synthetic Minority Over-sampling Technique},
+  journaltitle = {Journal of Artificial Intelligence Research},
+  date         = {2002},
+  volume       = {16},
+  pages        = {321--357}
+}
+
+@article{he2009learning,
+  author       = {He, Haibo and Garcia, Edwardo A.},
+  title        = {Learning from Imbalanced Data},
+  journaltitle = {IEEE Transactions on Knowledge and Data Engineering},
+  date         = {2009},
+  volume       = {21},
+  number       = {9},
+  pages        = {1263--1284}
+}
+
+@article{he2008imbalanced,
+  author       = {He, Haibo and Bai, Yang and Garcia, Edwardo A. and Li, Shutao},
+  title        = {{ADASYN}: Adaptive Synthetic Sampling Approach for Imbalanced Learning},
+  journaltitle = {IEEE International Joint Conference on Neural Networks},
+  date         = {2008},
+  pages        = {1322--1328}
+}
+
+@inproceedings{lin2017focal,
+  author       = {Lin, Tsung-Yi and Goyal, Priya and Girshick, Ross and He, Kaiming and Doll\'ar, Piotr},
+  title        = {Focal Loss for Dense Object Detection},
+  booktitle    = {IEEE International Conference on Computer Vision (ICCV)},
+  date         = {2017},
+  pages        = {2980--2988}
+}
+
+% ── Calibration ─────────────────────────────────────────────────────
+@incollection{platt1999platt,
+  author       = {Platt, John C.},
+  title        = {Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized
+                  Likelihood Methods},
+  booktitle    = {Advances in Large Margin Classifiers},
+  publisher    = {MIT Press},
+  date         = {1999},
+  pages        = {61--74}
+}
+
+@inproceedings{zadrozny2002isotonic,
+  author       = {Zadrozny, Bianca and Elkan, Charles},
+  title        = {Transforming Classifier Scores into Accurate Multiclass Probability Estimates},
+  booktitle    = {Proceedings of ACM SIGKDD},
+  date         = {2002},
+  pages        = {694--699}
+}
+
+@inproceedings{niculescu2005predicting,
+  author       = {Niculescu-Mizil, Alexandru and Caruana, Rich},
+  title        = {Predicting Good Probabilities with Supervised Learning},
+  booktitle    = {Proceedings of ICML},
+  date         = {2005},
+  pages        = {625--632}
+}
+
+@inproceedings{naeini2015obtaining,
+  author       = {Naeini, Mahdi Pakdaman and Cooper, Gregory F. and Hauskrecht, Milos},
+  title        = {Obtaining Well Calibrated Probabilities Using Bayesian Binning},
+  booktitle    = {Proceedings of AAAI},
+  date         = {2015}
+}
+
+% ── Statistical tests ───────────────────────────────────────────────
+@article{mcnemar1947,
+  author       = {McNemar, Quinn},
+  title        = {Note on the Sampling Error of the Difference Between Correlated Proportions or Percentages},
+  journaltitle = {Psychometrika},
+  date         = {1947},
+  volume       = {12},
+  number       = {2},
+  pages        = {153--157}
+}
+
+@article{cochran1950,
+  author       = {Cochran, William G.},
+  title        = {The Comparison of Percentages in Matched Samples},
+  journaltitle = {Biometrika},
+  date         = {1950},
+  volume       = {37},
+  number       = {3/4},
+  pages        = {256--266}
+}
+
+@article{dietterich1998approximate,
+  author       = {Dietterich, Thomas G.},
+  title        = {Approximate Statistical Tests for Comparing Supervised Classification Learning Algorithms},
+  journaltitle = {Neural Computation},
+  date         = {1998},
+  volume       = {10},
+  number       = {7},
+  pages        = {1895--1923}
+}
+
+@article{efron1979bootstrap,
+  author       = {Efron, Bradley},
+  title        = {Bootstrap Methods: Another Look at the Jackknife},
+  journaltitle = {The Annals of Statistics},
+  date         = {1979},
+  volume       = {7},
+  number       = {1},
+  pages        = {1--26}
+}
+
+% ── Explainability ──────────────────────────────────────────────────
+@inproceedings{lundberg2017shap,
+  author       = {Lundberg, Scott M. and Lee, Su-In},
+  title        = {A Unified Approach to Interpreting Model Predictions},
+  booktitle    = {Advances in Neural Information Processing Systems (NeurIPS)},
+  date         = {2017},
+  pages        = {4765--4774}
+}
+
+@inproceedings{ribeiro2016should,
+  author       = {Ribeiro, Marco Tulio and Singh, Sameer and Guestrin, Carlos},
+  title        = {``{Why} Should I Trust You?'': Explaining the Predictions of Any Classifier},
+  booktitle    = {Proceedings of ACM SIGKDD},
+  date         = {2016},
+  pages        = {1135--1144}
+}
+
+@inproceedings{abnar2020quantifying,
+  author       = {Abnar, Samira and Zuidema, Willem},
+  title        = {Quantifying Attention Flow in Transformers},
+  booktitle    = {Proceedings of ACL},
+  date         = {2020},
+  pages        = {4190--4197}
+}
+
+@inproceedings{chefer2021transformer,
+  author       = {Chefer, Hila and Gur, Shir and Wolf, Lior},
+  title        = {Transformer Interpretability Beyond Attention Visualization},
+  booktitle    = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  date         = {2021},
+  pages        = {782--791}
+}
+
+% ── Virality / popularity prediction ────────────────────────────────
+@book{gladwell2000tipping,
+  author       = {Gladwell, Malcolm},
+  title        = {The Tipping Point: How Little Things Can Make a Big Difference},
+  publisher    = {Little, Brown},
+  date         = {2000}
+}
+
+@article{berger2012makes,
+  author       = {Berger, Jonah and Milkman, Katherine L.},
+  title        = {What Makes Online Content Viral?},
+  journaltitle = {Journal of Marketing Research},
+  date         = {2012},
+  volume       = {49},
+  number       = {2},
+  pages        = {192--205}
+}
+
+@inproceedings{cheng2014can,
+  author       = {Cheng, Justin and Adamic, Lada and Dow, P. Alex and Kleinberg, Jon Michael and
+                  Leskovec, Jure},
+  title        = {Can Cascades Be Predicted?},
+  booktitle    = {Proceedings of WWW},
+  date         = {2014},
+  pages        = {925--936}
+}
+
+@inproceedings{pinto2013using,
+  author       = {Pinto, Henrique and Almeida, Jussara M. and Gon\c{c}alves, Marcos A.},
+  title        = {Using Early View Patterns to Predict the Popularity of {YouTube} Videos},
+  booktitle    = {Proceedings of WSDM},
+  date         = {2013},
+  pages        = {365--374}
+}
+
+@article{borghol2012untold,
+  author       = {Borghol, Youmna and Ardon, Sebastien and Carlsson, Niklas and Eager, Derek and
+                  Mahanti, Anirban},
+  title        = {The Untold Story of the Clones: Content-Agnostic Factors That Impact {YouTube} Video Popularity},
+  journaltitle = {Proceedings of ACM SIGKDD},
+  date         = {2012},
+  pages        = {1186--1194}
+}
+
+@inproceedings{khosla2014popularity,
+  author       = {Khosla, Aditya and Das Sarma, Atish and Hamid, Raffay},
+  title        = {What Makes an Image Popular?},
+  booktitle    = {Proceedings of WWW},
+  date         = {2014},
+  pages        = {867--876}
+}
+
+@inproceedings{trzcinski2017popularity,
+  author       = {Trzci\'nski, Tomasz and Rokita, Przemys{\l}aw},
+  title        = {Predicting Popularity of Online Videos Using Support Vector Regression},
+  journaltitle = {IEEE Transactions on Multimedia},
+  date         = {2017},
+  volume       = {19},
+  number       = {11},
+  pages        = {2561--2570}
+}
+
+@inproceedings{hoiles2017engagement,
+  author       = {Hoiles, William and Aprem, Anup and Krishnamurthy, Vikram},
+  title        = {Engagement and Popularity Dynamics of {YouTube} Videos and Sensitivity to Meta-Data},
+  journaltitle = {IEEE Transactions on Knowledge and Data Engineering},
+  date         = {2017},
+  volume       = {29},
+  number       = {7},
+  pages        = {1426--1437}
+}
+
+@inproceedings{lee2010approach,
+  author       = {Lee, Jong Gun and Moon, Sue and Salamatian, Kav\'e},
+  title        = {An Approach to Model and Predict the Popularity of Online Contents with Explanatory Factors},
+  booktitle    = {IEEE/WIC/ACM International Conference on Web Intelligence},
+  date         = {2010}
+}
+
+@inproceedings{wu2016unfolding,
+  author       = {Wu, Bo and Cheng, Wen-Huang and Zhang, Yongdong and Mei, Tao},
+  title        = {Unfolding Temporal Dynamics: Predicting Social Media Popularity Using Multi-scale Temporal Decomposition},
+  booktitle    = {Proceedings of AAAI},
+  date         = {2016}
+}
+
+@inproceedings{potthast2018clickbait,
+  author       = {Potthast, Martin and K\"opsel, Sebastian and Stein, Benno and Hagen, Matthias},
+  title        = {Clickbait Detection},
+  booktitle    = {Proceedings of ECIR},
+  date         = {2018},
+  pages        = {810--817}
+}
+
+% ── Thai-specific applied works ─────────────────────────────────────
+% ── Industry / digital reports ──────────────────────────────────────
+@misc{kemp2025digital,
+  author       = {Kemp, Simon},
+  title        = {Digital 2025: Global Overview Report},
+  publisher    = {DataReportal -- We Are Social -- Meltwater},
+  date         = {2025-01},
+  url          = {https://datareportal.com/reports/digital-2025-global-overview-report}
+}
+
+@misc{datareportal2025thailand,
+  author       = {Kemp, Simon},
+  title        = {Digital 2025: Thailand},
+  publisher    = {DataReportal},
+  date         = {2025-02},
+  url          = {https://datareportal.com/reports/digital-2025-thailand}
+}
+
+@misc{ceci2024youtube,
+  author       = {Ceci, Laura},
+  title        = {{YouTube} -- Statistics \& Facts},
+  publisher    = {Statista},
+  date         = {2024}
+}
+
+% ── Low-resource / few-shot finding ─────────────────────────────────
+@inproceedings{lin2022few,
+  author       = {Lin, Xi Victoria and Mihaylov, Todor and Artetxe, Mikel and Wang, Tianlu and
+                  Chen, Shuohui and Simig, Daniel and others},
+  title        = {Few-shot Learning with Multilingual Generative Language Models},
+  booktitle    = {Proceedings of EMNLP},
+  date         = {2022}
+}

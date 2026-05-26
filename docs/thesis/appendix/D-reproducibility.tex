@@ -1,0 +1,126 @@
+% appendix/D-reproducibility.tex
+\chapter{ความสามารถในการทำซ้ำ}
+\label{app:repro}
+
+\section{สภาพแวดล้อมการรัน}
+
+\begin{table}[H]
+\centering
+\caption{สภาพแวดล้อมการรันของผลการศึกษา}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{ส่วนประกอบ} & \textbf{เวอร์ชัน / รายละเอียด} \\
+\midrule
+ระบบปฏิบัติการ (local)        & macOS 15.2 (Apple M1, 8 GB unified memory) \\
+ระบบปฏิบัติการ (cloud)        & Ubuntu 22.04 (Hugging Face Jobs container) \\
+Python                        & 3.11.x \\
+ผู้จัดการแพ็กเกจ              & uv 0.5.x \\
+PyTorch                       & 2.5.x (CUDA 12.4 build บนคลาวด์) \\
+transformers                  & 5.0.x \\
+datasets                      & 3.0.x \\
+scikit-learn                  & 1.5.x \\
+LightGBM                      & 4.5.x \\
+XGBoost                       & 2.1.x \\
+SHAP                          & 0.46.x \\
+LIME                          & 0.2.0.1 \\
+MLflow                        & 2.18.x \\
+GPU (cloud encoder FT)        & NVIDIA T4 (16 GB) / A10G (24 GB) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{คำสั่งที่ใช้ในการทำซ้ำผล}
+
+\begin{lstlisting}[language=bash,caption={ขั้นตอนการ reproduce ทั้งหมด}]
+# 1. คลังโค้ดและข้อมูล (ขอจากคณะผู้วิจัยหรืออาจารย์ที่ปรึกษา)
+#    \authorone, \authortwo, \authorthree
+#    Advisor: \advisor
+
+# 2. ติดตั้ง environment
+uv venv --python 3.11
+uv pip install -e ".[dev]"
+
+# 3. ใส่ API key (สร้างไฟล์ .env.local)
+echo "YOUTUBE_API_KEY=YOUR_KEY_HERE" >> .env.local
+echo "HUGGINGFACE_TOKEN=YOUR_HF_TOKEN" >> .env.local
+
+# 4. เก็บข้อมูลและจัดเตรียม
+make collect            # YouTube Data API v3 (1-2 hours)
+make prepare            # clean + label + split + features
+
+# 5. ฝึก baselines (local CPU)
+make train-baselines    # LR / LightGBM / XGBoost (~10 min)
+make train-hybrid       # MLP + GBM heads (~5 min)
+
+# 6. ฝึก transformers (cloud GPU via HF Jobs)
+make train-hf-all-detached
+# poll: scripts/cloud/run_on_hf_jobs.py --poll-only --job-id <id>
+
+# 7. ประกอบและประเมินผล
+make train-stacking     # meta-LR + Platt calibration
+make stacking-drop-one  # drop-one ablation
+make eval               # ROC, McNemar, Cochran's Q, calibration
+make explain            # SHAP / LIME / attention rollout
+
+# 8. สร้างกราฟ
+uv run python scripts/thesis_figures.py
+
+# 9. คอมไพล์ thesis
+cd docs/thesis
+xelatex main && biber main && xelatex main && xelatex main
+\end{lstlisting}
+
+\section{Hash ของข้อมูลและ git SHA}
+
+\begin{table}[H]
+\centering
+\caption{Hash อ้างอิงของผลการศึกษา}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Artifact} & \textbf{SHA-256 (12 ตัวแรก) / git SHA} \\
+\midrule
+\texttt{data/processed/dataset\_with\_labels.parquet} & บันทึกใน MLflow tag \texttt{dataset\_hash} \\
+git SHA ของผลในบทที่ \ref{ch:results}                  & \texttt{60fad4a} (พร้อมการเพิ่ม HF Jobs) \\
+MLflow experiment                                      & \texttt{thesis-virality-thai} \\
+HF Datasets (private, จัดเตรียมโดยคณะผู้วิจัย)         & input + per-model outputs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{เหตุการณ์และข้อจำกัดเชิงเทคนิค}
+
+\subsection{Apple M1 MPS และ NaN logits}
+ในระยะแรกของการทดลอง คณะผู้วิจัยพยายามฝึก PhayaThaiBERT บนเครื่อง Apple M1
+ผ่าน Metal Performance Shaders (MPS) backend พบว่าการตั้ง \texttt{fp16=True}
+หรือ \texttt{bf16=True} ส่งผลให้ logits เป็น NaN ตั้งแต่ epoch แรก คณะผู้วิจัย
+แก้ไขด้วยการเพิ่มฟังก์ชัน \texttt{\_has\_cuda()} ใน
+\texttt{src/models/transformer\_finetune.py:16-25} ที่ปิด mixed precision
+อัตโนมัติเมื่อไม่ใช่ CUDA
+
+\subsection{Kaggle Free GPU Pool}
+คิว Kaggle Free GPU pool ในช่วงดำเนินงานหนาแน่นต่อเนื่องเกิน 6 ชั่วโมง คณะ
+ผู้วิจัยจึงตัดสินใจย้ายการฝึกไปยัง Hugging Face Jobs ซึ่งจองได้ทันที ค่าใช้จ่าย
+รวมประมาณ \$0.50
+
+\subsection{Train\_hybrid Silent GBM Skip on MPS}
+สคริปต์ \texttt{scripts/train\_hybrid.py} แสดงพฤติกรรมที่ข้าม training ของ
+GBM head อย่างเงียบ ๆ หลังจากฝึก MLP บน MPS เนื่องจาก backend resource
+contention คณะผู้วิจัยใช้ workaround โดยรัน MLP และ GBM ในสคริปต์แยก
+รายละเอียดอยู่ใน \texttt{.claude/memory/decisions.md}
+
+\section{การ Audit ทางสถิติ}
+
+ผลทุกตัวเลขในบทที่ \ref{ch:results} ถูกตรวจสอบความสอดคล้องระหว่าง 3 แหล่ง
+ดังนี้
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{MLflow run UI} — point estimate และค่า metric ทุก epoch
+  \item \textbf{CSV ใน \texttt{reports/tables/}} — point estimate + bootstrap
+        CI 95\% สำหรับใช้พิมพ์ในตาราง LaTeX
+  \item \textbf{Parquet ใน \texttt{reports/artifacts/predictions/}} —
+        \texttt{(video\_id, split, y\_true, y\_proba)} สำหรับ McNemar /
+        Cochran / re-run bootstrap
+\end{enumerate}
+
+หากพบความไม่สอดคล้องระหว่างสามแหล่ง parquet predictions เป็น source of
+truth ที่ recompute ได้ทันทีโดยไม่ต้อง re-train

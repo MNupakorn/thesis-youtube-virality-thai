@@ -1,0 +1,104 @@
+% appendix/B-extended-tables.tex
+\chapter{ตารางผลการทดลองฉบับเต็ม}
+\label{app:tables}
+
+ภาคผนวกนี้รวมตารางทั้งหมดที่ไม่ได้แสดงเต็มในบทที่ \ref{ch:results} เนื่องจาก
+ข้อจำกัดด้านพื้นที่ ตารางทุกตัวสร้างจาก CSV ใน \texttt{reports/tables/}
+
+\section{Pairwise McNemar's Test สำหรับ 22 แบบจำลอง}
+\label{app:mcnemar-full}
+
+ตารางที่ \ref{tab:mcnemar-full} แสดง McNemar's $\chi^2$ statistic และ
+$p$-value สำหรับทุกคู่ของแบบจำลอง 22 ตัว (เลือกแสดงเฉพาะคู่ที่มี $p < 10^{-30}$)
+แหล่งที่มา: \texttt{reports/tables/mcnemar\_pairwise.csv}
+
+\begin{longtable}{p{5cm}p{5cm}rl}
+\caption{Pairwise McNemar's test (selected pairs)}
+\label{tab:mcnemar-full} \\
+\toprule
+\textbf{Model A} & \textbf{Model B} & \textbf{$\chi^2$} & \textbf{$p$-value} \\
+\midrule
+\endhead
+stacking\_lr\_calibrated & channel\_prior            & 695.53 & $2.8\!\times\!10^{-153}$ \\
+stacking\_lr\_calibrated & hybrid\_gbm               & 695.53 & $2.8\!\times\!10^{-153}$ \\
+stacking\_lr\_calibrated & logistic\_regression\_struct   & 562.31 & $2.6\!\times\!10^{-124}$ \\
+stacking\_lr\_calibrated & logistic\_regression\_struct+tfidf & 476.54 & $1.2\!\times\!10^{-105}$ \\
+stacking\_lr\_calibrated & xlm-roberta-large          & 353.51 & $7.3\!\times\!10^{-79}$ \\
+stacking\_lr\_calibrated & xgboost\_structured        & 352.97 & $9.6\!\times\!10^{-79}$ \\
+stacking\_lr\_calibrated & lightgbm\_structured+tfidf & 234.30 & $6.9\!\times\!10^{-53}$ \\
+phayathaibert            & xlm-roberta-large          & 458.55 & $9.9\!\times\!10^{-102}$ \\
+wangchanberta            & xlm-roberta-large          & 314.02 & $2.9\!\times\!10^{-70}$ \\
+phayathaibert            & wangchanberta              & 28.31  & $1.0\!\times\!10^{-7}$ \\
+\bottomrule
+\end{longtable}
+
+\section{Drop-One Stacking Ablation (เต็ม)}
+\label{app:drop-one-full}
+
+ตารางที่ \ref{tab:drop-one-full} แสดงผลการ ablate ฐาน 14 ตัวจาก 15 ทีละตัว
+แหล่งที่มา: \texttt{reports/tables/stacking\_drop\_one\_ablation.csv}
+
+\begin{longtable}{lrrr}
+\caption{Drop-one stacking ablation (full)}
+\label{tab:drop-one-full} \\
+\toprule
+\textbf{Removed base} & \textbf{ROC-AUC} & \textbf{$\Delta$ vs full} & \textbf{95\% CI} \\
+\midrule
+\endhead
+(none, full = 14 bases)             & 0.6912 & ---       & [0.662, 0.717] \\
+lightgbm\_structured+tfidf          & 0.6866 & $-$0.0047 & [0.657, 0.713] \\
+phayathaibert                       & 0.6871 & $-$0.0041 & [0.658, 0.712] \\
+logistic\_regression\_struct+tfidf  & 0.6883 & $-$0.0030 & [0.660, 0.714] \\
+wangchanberta                       & 0.6886 & $-$0.0027 & [0.660, 0.714] \\
+lightgbm\_structured                & 0.6887 & $-$0.0025 & [0.658, 0.712] \\
+hybrid\_mlp                         & 0.6888 & $-$0.0024 & [0.661, 0.713] \\
+logistic\_regression\_tfidf         & 0.6910 & $-$0.0002 & [0.661, 0.716] \\
+logistic\_regression\_structured    & 0.6911 & $-$0.0002 & [0.662, 0.716] \\
+xgboost\_structured                 & 0.6911 & $-$0.0001 & [0.661, 0.716] \\
+hybrid\_gbm                         & 0.6912 & $-$0.0001 & [0.662, 0.716] \\
+xlm-roberta-large                   & 0.6912 & $-$0.0000 & [0.662, 0.716] \\
+lightgbm\_tfidf                     & 0.6914 & $+$0.0001 & [0.662, 0.716] \\
+xgboost\_tfidf                      & 0.6928 & $+$0.0016 & [0.663, 0.718] \\
+xgboost\_structured+tfidf           & 0.6932 & $+$0.0020 & [0.663, 0.721] \\
+\bottomrule
+\end{longtable}
+
+\section{สรุปการปรับเทียบทั้งหมด}
+\label{app:calibration-full}
+
+ตารางที่ \ref{tab:calib-full} เปรียบเทียบ ECE ของแบบจำลอง 2 ตัวที่ดีที่สุด
+สามวิธีการปรับเทียบ แหล่งที่มา: \texttt{reports/tables/calibration\_*.csv}
+
+\begin{table}[H]
+\centering
+\caption{ECE ก่อนและหลังการปรับเทียบสำหรับสองแบบจำลองหลัก (15 bins)}
+\label{tab:calib-full}
+\begin{tabularx}{\textwidth}{X|rrr}
+\toprule
+\textbf{Model} & \textbf{None} & \textbf{Platt} & \textbf{Isotonic} \\
+\midrule
+stacking\_lr (raw)               & 0.337 & 0.0162 & 0.0149 \\
+stacking\_lr\_calibrated         & 0.0161 & 0.0148 & 0.0140 \\
+baselines/lightgbm\_struct+tfidf & 0.0418 & 0.0192 & 0.0163 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Per-Category Breakdown}
+\label{app:category-full}
+
+\begin{table}[H]
+\centering
+\caption{ประสิทธิภาพของ stacking\_lr\_calibrated ตามหมวดหมู่ YouTube
+(แหล่งที่มา: \texttt{reports/tables/per\_category\_breakdown.csv})}
+\label{tab:cat-full}
+\begin{tabularx}{\textwidth}{lXrrrrr}
+\toprule
+\textbf{Cat ID} & \textbf{Title} & \textbf{n} & \textbf{Accuracy} & \textbf{ROC-AUC} & \textbf{PR-AUC} & \textbf{F1$_{\text{macro}}$} \\
+\midrule
+24 & Entertainment & 815  & 0.933 & 0.7455 & 0.136 & 0.483 \\
+20 & Gaming        & 2313 & 0.903 & 0.6943 & 0.196 & 0.475 \\
+10 & Music         & 382  & 0.924 & 0.5827 & 0.124 & 0.480 \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,67 @@
+% frontmatter/abstract-en.tex — English abstract
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract (English)}
+
+\noindent\textbf{Title:}\ \thesistitleEN\\
+\textbf{By:}\ \authoroneEN, \authortwoEN, \authorthreeEN\\
+\textbf{Advisor:}\ \advisorEN, Ph.D.\\
+\textbf{Academic Year:}\ \academicyearEN
+
+\vspace{0.6cm}
+
+YouTube hosts more than 2.5 billion monthly active users and is the dominant
+distribution channel for Thai content creators. Predicting whether a newly
+posted video will go \emph{viral} is therefore commercially and academically
+valuable. This study formulates the task as binary classification of Thai
+videos using a \emph{per-channel virality index} ($\mathit{VI}$) that
+aggregates the engagement rate, like ratio, and comment ratio after a
+log-transform and a within-channel z-score, with the positive class taken
+as the top decile per channel. The per-channel construction explicitly
+removes channel size as a confounder.
+
+The dataset comprises 23{,}431 videos from 82 channels collected through the
+YouTube Data API v3, with a 10.16\% positive class rate. The split policy is
+\emph{channel-grouped and time-aware}: the test set is the latest 15\% of
+videos by \texttt{published\_at}, with no channel shared between train and
+validation. Class imbalance is handled \emph{only on the training fold}
+(3:1 undersampling), so validation and test retain the natural distribution.
+
+Three Thai transformer encoders of differing scale and architecture are
+compared end-to-end: \textbf{WangchanBERTa} (105M, RoBERTa SentencePiece),
+\textbf{PhayaThaiBERT} (278M, RoBERTa), and \textbf{XLM-RoBERTa-large}
+(560M, multilingual). All three are full-fine-tuned on cloud GPUs (NVIDIA
+T4/A10G via Hugging Face Jobs). Classical baselines (Logistic Regression,
+LightGBM, XGBoost) are trained over 27 structured features fused with
+character-N-gram TF-IDF and Wisesight-Sentiment scores. A hybrid model
+(MLP + LightGBM head) operates on title embeddings concatenated with
+structured features. Finally, a \emph{Platt-calibrated stacking ensemble}
+fits a logistic-regression meta-learner over the validation-fold
+probabilities of fifteen base models.
+
+On the held-out time-aware test set, the calibrated stacking ensemble
+attains a test \textbf{ROC-AUC of 0.6914} with a 1{,}000-sample bootstrap
+95\% confidence interval of \textbf{[0.6625, 0.7174]} and an Expected
+Calibration Error of 0.016. This is significantly higher than the strongest
+single model, LightGBM-Structured+TF-IDF (0.6728; McNemar
+$p = 6.9\!\times\!10^{-53}$). Among single transformer encoders, PhayaThaiBERT
+performs best (0.6451), followed by WangchanBERTa (0.6402) and
+XLM-RoBERTa-large (0.5450). Cochran's Q across the three encoders yields
+$Q = 612.69$, $p = 9.0\!\times\!10^{-134}$ ($df = 2$), confirming that the
+encoders' error patterns differ significantly. Per-bucket evaluation shows
+the ensemble generalises better on large channels ($\geq$1M subscribers,
+ROC-AUC = 0.7459) than on mid-size channels (100k--1M, 0.6273).
+
+We report an honest \emph{negative finding}: feeding PhayaThaiBERT a
+multi-field text (\texttt{title + description + channel}) \emph{degraded}
+ROC-AUC from 0.6451 to 0.5455, reflecting the boilerplate nature of Thai
+YouTube descriptions. Explainability analyses (SHAP, LIME, attention
+rollout) show that the dominant predictive signal lives in structured
+features (title length, emoji density, channel subscriber count) and that
+language signals contribute to the ensemble through diversity rather than
+through any single best encoder.
+
+\noindent\textbf{Keywords:} YouTube virality prediction, Thai transformer
+language models, WangchanBERTa, PhayaThaiBERT, XLM-RoBERTa, stacking
+ensemble, McNemar's test, Cochran's Q, probability calibration, SHAP, LIME.
+
+\newpage

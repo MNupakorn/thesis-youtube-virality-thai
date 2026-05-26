@@ -1,0 +1,35 @@
+% frontmatter/symbols.tex — รายการสัญลักษณ์ทางคณิตศาสตร์
+\chapter*{รายการสัญลักษณ์}
+\addcontentsline{toc}{chapter}{รายการสัญลักษณ์}
+
+\begin{longtable}{lp{11cm}}
+\toprule
+\textbf{สัญลักษณ์} & \textbf{ความหมาย} \\
+\midrule
+\endhead
+$\mathit{VI}$              & ดัชนีความไวรัล (Per-Channel Virality Index) \\
+$w_e, w_l, w_c$            & น้ำหนักของ engagement, like, comment ใน $\mathit{VI}$ (0.5, 0.3, 0.2) \\
+$z_{r,i}$                  & ค่า z-score ของอัตราส่วน $r$ ของวิดีโอ $i$ ภายในช่อง \\
+$Q_{0.9}^{(g)}$            & เดไซล์ที่ 9 ของ $\mathit{VI}$ ในช่อง $g$ \\
+$y_i$                      & ป้ายกำกับทวิภาค $\in \{0,1\}$ ของวิดีโอ $i$ \\
+$\hat p_i$                 & ความน่าจะเป็นพยากรณ์ของชั้นบวกสำหรับวิดีโอ $i$ \\
+$\theta$                   & threshold การจำแนก (จาก validation, optimise F1$_{\text{pos}}$) \\
+$\alpha$                   & ระดับนัยสำคัญ ($=0.05$) \\
+$\gamma$                   & พารามิเตอร์ของ Focal Loss \\
+$\beta_j$                  & ค่าสัมประสิทธิ์ของ meta-LR สำหรับแบบจำลองฐาน $j$ \\
+$Q, K, V$                  & เมทริกซ์ Query / Key / Value ใน Self-Attention \\
+$d_k$                      & มิติของ key ใน Scaled Dot-Product Attention \\
+$A^{(l)}$                  & เมทริกซ์ attention weight ของชั้น $l$ \\
+$\tilde A^{(l)}$           & attention หลังเพิ่ม identity และ row-normalise \\
+$M$                        & จำนวน bins ใน ECE \\
+$|B_m|$                    & ขนาดของ bin $m$ \\
+$n_{01}, n_{10}$           & ความถี่ของกรณี A ถูก/B ผิด และ A ผิด/B ถูก ใน McNemar table \\
+$\chi^2_{k}$               & การกระจายไคสแควร์ที่ $k$ degrees of freedom \\
+$Q$ (สถิติ)                & สถิติของ Cochran's Q test \\
+$C_j, R_i$                 & ผลรวมความถูกของตัวจำแนก $j$ / ตัวอย่าง $i$ ใน Cochran's Q \\
+$T$                        & ผลรวมความถูกทั้งหมด ($\sum_j C_j = \sum_i R_i$) \\
+$n_{\text{train}}, n_{\text{val}}, n_{\text{test}}$ & ขนาดของชุดข้อมูล \\
+$\epsilon$                 & ค่าน้อย ($10^{-6}$) ป้องกัน division-by-zero \\
+\bottomrule
+\end{longtable}
+\newpage

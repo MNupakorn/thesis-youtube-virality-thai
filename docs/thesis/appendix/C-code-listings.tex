@@ -1,0 +1,160 @@
+% appendix/C-code-listings.tex
+\chapter{ข้อความรหัส (Code Listings)}
+\label{app:code}
+
+ภาคผนวกนี้รวมข้อความรหัสที่สำคัญจากระบบ ฉบับเต็มรวมไปถึง pipeline และ
+configurations ทั้งหมดถูกจัดเก็บไว้กับคณะผู้วิจัยและอาจารย์ที่ปรึกษา
+สำหรับการตรวจสอบหรือ reproduce
+
+\section{การคำนวณ Virality Index}
+\begin{lstlisting}[language=Python,caption={src/data\_processing/labels.py -- Per-Channel Virality Index},label={lst:vi}]
+import numpy as np
+import pandas as pd
+
+def compute_virality_index(
+    df: pd.DataFrame,
+    *,
+    w_eng: float = 0.5,
+    w_like: float = 0.3,
+    w_cmt: float = 0.2,
+    decile: float = 0.9,
+    eps: float = 1e-6,
+) -> pd.DataFrame:
+    """Compute per-channel Virality Index and binary label."""
+    df = df.copy()
+    v = df["view_count"].astype(float)
+    df["r_eng"]  = (df["like_count"] + df["comment_count"]) / (v + 1.0)
+    df["r_like"] = df["like_count"]  / (v + 1.0)
+    df["r_cmt"]  = df["comment_count"] / (v + 1.0)
+    for c in ("r_eng", "r_like", "r_cmt"):
+        df[c] = np.log10(1.0 + df[c])
+    grp = df.groupby("channel_id")
+    for c in ("r_eng", "r_like", "r_cmt"):
+        df[f"z_{c}"] = grp[c].transform(
+            lambda s: (s - s.mean()) / (s.std(ddof=0) + eps)
+        )
+    df["VI"] = (
+        w_eng * df["z_r_eng"]
+        + w_like * df["z_r_like"]
+        + w_cmt * df["z_r_cmt"]
+    )
+    threshold = grp["VI"].transform(lambda s: s.quantile(decile))
+    df["label_viral"] = (df["VI"] >= threshold).astype(int)
+    return df
+\end{lstlisting}
+
+\section{การแบ่งข้อมูลแบบ channel-grouped + time-aware}
+\begin{lstlisting}[language=Python,caption={src/data\_processing/splits.py},label={lst:split}]
+from sklearn.model_selection import GroupShuffleSplit
+
+def make_split(df, *, test_ratio=0.15, val_ratio=0.225, seed=42):
+    df = df.sort_values("published_at").reset_index(drop=True)
+    n = len(df)
+    cut = int(n * (1 - test_ratio))
+    test = df.iloc[cut:].copy()
+    test["split"] = "test"
+    pool = df.iloc[:cut].copy()
+    splitter = GroupShuffleSplit(
+        n_splits=1, test_size=val_ratio, random_state=seed
+    )
+    train_idx, val_idx = next(
+        splitter.split(pool, groups=pool["channel_id"])
+    )
+    pool.loc[pool.index[train_idx], "split"] = "train"
+    pool.loc[pool.index[val_idx], "split"]   = "val"
+    out = pd.concat([pool, test], ignore_index=True)
+    return _undersample_train(out, ratio=3, seed=seed)
+\end{lstlisting}
+
+\section{Stacking ensemble และการปรับเทียบ}
+\begin{lstlisting}[language=Python,caption={scripts/train\_stacking.py (สาระสำคัญ)},label={lst:stacking}]
+from sklearn.linear_model import LogisticRegression
+from sklearn.calibration import CalibratedClassifierCV
+
+# Build val/test wide matrices
+X_val  = matrix(val_preds_dict)   # (n_val,  k_models)
+X_test = matrix(test_preds_dict)  # (n_test, k_models)
+
+# 1) Meta-LR
+meta = LogisticRegression(C=1.0, max_iter=2000,
+                          class_weight="balanced",
+                          random_state=42)
+meta.fit(X_val, y_val)
+p_val_self = meta.predict_proba(X_val)[:, 1]
+p_test     = meta.predict_proba(X_test)[:, 1]
+
+# 2) Platt calibration on validation outputs
+cal = CalibratedClassifierCV(meta, method="sigmoid", cv="prefit")
+cal.fit(X_val, y_val)
+p_test_cal = cal.predict_proba(X_test)[:, 1]
+\end{lstlisting}
+
+\section{การคำนวณ McNemar's test และ Cochran's Q}
+\begin{lstlisting}[language=Python,caption={src/evaluation/stats\_tests.py},label={lst:stats}]
+import numpy as np
+from scipy.stats import chi2
+
+def mcnemar(a_correct: np.ndarray, b_correct: np.ndarray):
+    """Pairwise McNemar with continuity correction."""
+    n01 = int(((a_correct == 1) & (b_correct == 0)).sum())
+    n10 = int(((a_correct == 0) & (b_correct == 1)).sum())
+    if n01 + n10 < 25:
+        stat = (abs(n01 - n10) - 1) ** 2 / (n01 + n10 + 1e-9)
+    else:
+        stat = (n01 - n10) ** 2 / (n01 + n10 + 1e-9)
+    return stat, 1 - chi2.cdf(stat, df=1), n01, n10
+
+def cochran_q(correct_matrix: np.ndarray):
+    """correct_matrix : (n_samples, k_classifiers), 0/1."""
+    n, k = correct_matrix.shape
+    Cj = correct_matrix.sum(axis=0)
+    Ri = correct_matrix.sum(axis=1)
+    T  = correct_matrix.sum()
+    num = (k - 1) * (k * (Cj ** 2).sum() - T ** 2)
+    den = k * T - (Ri ** 2).sum()
+    Q = num / max(den, 1e-12)
+    return Q, 1 - chi2.cdf(Q, df=k - 1)
+\end{lstlisting}
+
+\section{Bootstrap confidence interval สำหรับ ROC-AUC}
+\begin{lstlisting}[language=Python,caption={src/evaluation/metrics.py -- bootstrap\_ci},label={lst:boot}]
+from sklearn.metrics import roc_auc_score
+import numpy as np
+
+def bootstrap_ci(y_true, y_proba, metric="roc_auc",
+                 n_iter=1000, alpha=0.05, seed=42):
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    point = roc_auc_score(y_true, y_proba)
+    samples = []
+    for _ in range(n_iter):
+        idx = rng.integers(0, n, size=n)
+        if len(np.unique(y_true[idx])) < 2:
+            continue
+        samples.append(roc_auc_score(y_true[idx], y_proba[idx]))
+    samples = np.array(samples)
+    lo = np.quantile(samples, alpha / 2)
+    hi = np.quantile(samples, 1 - alpha / 2)
+    return point, lo, hi
+\end{lstlisting}
+
+\section{การฝึกทรานส์ฟอร์เมอร์ผ่าน Hugging Face Jobs}
+\begin{lstlisting}[language=bash,caption={Makefile -- เป้าหมายคลาวด์},label={lst:make}]
+train-hf-wangchan:
+	uv run python scripts/cloud/run_on_hf_jobs.py \
+		--model wangchanberta --hardware t4-small
+
+train-hf-phaya:
+	uv run python scripts/cloud/run_on_hf_jobs.py \
+		--model phayathaibert --hardware a10g-small
+
+train-hf-xlmr:
+	uv run python scripts/cloud/run_on_hf_jobs.py \
+		--model xlm-roberta-large --hardware a10g-small
+
+train-hf-all-detached:
+	$(MAKE) train-hf-wangchan &
+	$(MAKE) train-hf-phaya &
+	$(MAKE) train-hf-xlmr &
+	wait
+\end{lstlisting}

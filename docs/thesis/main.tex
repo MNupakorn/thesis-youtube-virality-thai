@@ -1,0 +1,170 @@
+% main.tex — KMITL Applied Statistics & Data Analytics Thesis (XeLaTeX)
+% =====================================================================
+% Compile: xelatex → biber → xelatex → xelatex
+% In Overleaf: Menu → Compiler → XeLaTeX
+% =====================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ── Fonts (Thai + English via XeLaTeX) ─────────────────
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{thai}
+\setotherlanguage{english}
+
+% Auto-detect TH Sarabun New: ถ้ามีไฟล์ใน fonts/ → ใช้ Sarabun, ไม่มี → fallback ไป Norasi
+\IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
+  \setmainfont[
+    Path=./fonts/,
+    UprightFont=THSarabunNew.ttf,
+    BoldFont=THSarabunNew-Bold.ttf,
+    ItalicFont=THSarabunNew-Italic.ttf,
+    BoldItalicFont=THSarabunNew-BoldItalic.ttf,
+    Scale=1.4,
+    Ligatures=TeX
+  ]{THSarabunNew}%
+}{%
+  \setmainfont[Ligatures=TeX,Scale=1.0]{Norasi}%
+}
+
+\setmonofont[Scale=0.9]{Latin Modern Mono}
+
+\IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
+  \newfontfamily\thaifonttt[
+    Path=./fonts/,
+    UprightFont=THSarabunNew.ttf,
+    BoldFont=THSarabunNew-Bold.ttf,
+    Scale=1.3,
+    Ligatures=TeX
+  ]{THSarabunNew}%
+}{%
+  \newfontfamily\thaifonttt[Scale=1.0,Ligatures=TeX]{Norasi}%
+}
+
+% ── Thai line breaking (XeLaTeX) ──────────────────────
+\XeTeXlinebreaklocale "th"
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+\tolerance=2000
+\emergencystretch=3em
+\hyphenpenalty=5000
+\exhyphenpenalty=5000
+
+% ── Page geometry (KMITL) ──────────────────────────────
+\usepackage[a4paper,top=3.5cm,bottom=2.5cm,left=3.5cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ── Math / tables / graphics ─────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{arydshln}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,shapes.misc,arrows.meta,positioning,fit,backgrounds,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=blue, urlcolor=blue}
+
+% ── Bibliography ──────────────────────────────────────
+\usepackage[backend=biber,style=numeric,sorting=nyt,language=english]{biblatex}
+\addbibresource{references.bib}
+
+% ── Code listings ─────────────────────────────────────
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{codekey}{rgb}{0.0,0.4,0.7}
+\definecolor{codecom}{rgb}{0.4,0.55,0.4}
+\definecolor{codestr}{rgb}{0.7,0.2,0.2}
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{codekey}\bfseries,
+  commentstyle=\color{codecom}\itshape,
+  stringstyle=\color{codestr},
+  numbers=left, numberstyle=\tiny, frame=single,
+  breaklines=true, captionpos=b, tabsize=2,
+  showstringspaces=false,
+  inputencoding=utf8, extendedchars=true
+}
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null},
+  sensitive=true,
+  comment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% ── Captions in Thai ──────────────────────────────────
+\addto\captionsthai{%
+  \renewcommand{\contentsname}{สารบัญ}%
+  \renewcommand{\listfigurename}{สารบัญรูป}%
+  \renewcommand{\listtablename}{สารบัญตาราง}%
+  \renewcommand{\bibname}{เอกสารอ้างอิง}%
+  \renewcommand{\appendixname}{ภาคผนวก}%
+  \renewcommand{\chaptername}{บทที่}%
+  \renewcommand{\figurename}{ภาพที่}%
+  \renewcommand{\tablename}{ตารางที่}%
+  \renewcommand{\abstractname}{บทคัดย่อ}%
+}
+
+% ── Thesis metadata ────────────────────────────────────
+\newcommand{\thesistitleTH}{การศึกษาเชิงเปรียบเทียบของแบบจำลองทรานส์ฟอร์เมอร์ภาษาไทยสำหรับพยากรณ์ความไวรัลของวิดีโอ YouTube: WangchanBERTa, PhayaThaiBERT และ XLM-RoBERTa-large}
+\newcommand{\thesistitleEN}{A Comparative Study of Thai Transformer Language Models for YouTube Video Virality Prediction: WangchanBERTa, PhayaThaiBERT, and XLM-RoBERTa-large}
+\newcommand{\authorone}{นายตรัยภูรินท์ สืบสุวรรณสาร}
+\newcommand{\authortwo}{นายธีรนนท์ ไชยลังกา}
+\newcommand{\authorthree}{นายภาณุเดช ภู่โทสนธิ์}
+\newcommand{\authoroneEN}{Mr.\ Traipoohrin Suebuswansarn}
+\newcommand{\authortwoEN}{Mr.\ Teeranon Chailangka}
+\newcommand{\authorthreeEN}{Mr.\ Phanudech Phuthoson}
+\newcommand{\studentidone}{65050330}
+\newcommand{\studentidtwo}{65050417}
+\newcommand{\studentidthree}{65050685}
+\newcommand{\advisor}{ผศ.\ ดร.\ พรพิมล\ ชัยวุฒิศักดิ์}
+\newcommand{\advisorEN}{Asst.\ Prof.\ Dr.\ Pornpimol Chaiwuttisak}
+\newcommand{\academicyear}{2568}
+\newcommand{\academicyearEN}{2025}
+\newcommand{\department}{ภาควิชาสถิติประยุกต์และการวิเคราะห์ข้อมูล}
+\newcommand{\school}{คณะวิทยาศาสตร์}
+\newcommand{\university}{สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง}
+\newcommand{\universityEN}{King Mongkut's Institute of Technology Ladkrabang}
+
+\begin{document}
+
+\input{frontmatter/cover}
+\input{frontmatter/approval}
+\input{frontmatter/abstract-th}
+\input{frontmatter/abstract-en}
+\input{frontmatter/acknowledgement}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\input{frontmatter/abbreviations}
+\input{frontmatter/symbols}
+
+\input{chapters/01-introduction}
+\input{chapters/02-literature-review}
+\input{chapters/03-methodology}
+\input{chapters/04-results}
+\input{chapters/05-conclusion}
+
+\printbibliography[title=เอกสารอ้างอิง,heading=bibintoc]
+
+\appendix
+\input{appendix/A-configs}
+\input{appendix/B-extended-tables}
+\input{appendix/C-code-listings}
+\input{appendix/D-reproducibility}
+\input{appendix/E-datasheet}
+
+\end{document}
