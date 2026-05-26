@@ -154,7 +154,7 @@ def submit_job(
         f"thesis-encoder-{model}",
         image,
         "bash",
-        "-lc",
+        "-c",
         cmd_str,
     ]
     log.info(f"submitting HF Job: model={model} flavor={flavor} image={image}")
