@@ -31,6 +31,12 @@
   Scale=1.2]{THSarabunNew}
 \newfontfamily\thaifont[Path=fonts/,Extension=.ttf,
   UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.2]{THSarabunNew}
+% Thai monospace (polyglossia ต้องการ \thaifonttt — ใช้ TH Sarabun เพราะ
+% Latin Modern Mono ไม่รองรับ Thai script)
+\setmonofont[Path=fonts/,Extension=.ttf,
+  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.0]{THSarabunNew}
+\newfontfamily\thaifonttt[Path=fonts/,Extension=.ttf,
+  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.0]{THSarabunNew}
 
 % ── Packages ──────────────────────────────────────────────────────────
 \usepackage{amsmath,amssymb}
@@ -262,8 +268,8 @@
   \end{block}
   \textbf{ทำไมงานวิจัยนี้เลือกแบบสัมพัทธ์?}
   \begin{itemize}
-    \item เกณฑ์สัมบูรณ์ทำให้ \hl{ช่องขนาดใหญ่กลายเป็น positive ทั้งหมด} → ทำลายความแยกแยะ
-    \item เกณฑ์สัมพัทธ์สะท้อน ``ดีกว่าที่ช่องนี้ทำได้ตามปกติ'' → มีความหมายเชิงธุรกิจมากกว่า
+    \item เกณฑ์สัมบูรณ์ทำให้ \hl{ช่องขนาดใหญ่กลายเป็น positive ทั้งหมด} $\rightarrow$ ทำลายความแยกแยะ
+    \item เกณฑ์สัมพัทธ์สะท้อน ``ดีกว่าที่ช่องนี้ทำได้ตามปกติ'' $\rightarrow$ มีความหมายเชิงธุรกิจมากกว่า
     \item ป้องกัน majority-class collapse ในการฝึก
   \end{itemize}
 \end{frame}
@@ -308,7 +314,7 @@
 
   \textbf{เหตุผลในการเลือก 3 ตัวนี้:}
   \begin{itemize}
-    \item ครอบคลุม \hl{ขนาด} (105M → 278M → 560M) → ทดสอบ scaling
+    \item ครอบคลุม \hl{ขนาด} (105M $\rightarrow$ 278M $\rightarrow$ 560M) $\rightarrow$ ทดสอบ scaling
     \item ครอบคลุม \hl{สถาปัตยกรรม} (RoBERTa-style ทั้งหมด แต่ pre-training data ต่างกัน)
     \item ครอบคลุม \hl{philosophy} (monolingual vs multilingual)
   \end{itemize}
@@ -360,7 +366,7 @@
   \begin{enumerate}
     \item เลือก 82 ช่องไทยใน 3 หมวด: Entertainment, Gaming, Music
     \item ดึง video metadata: \texttt{videoId, title, description, tags, publishedAt, channelId, viewCount, likeCount, commentCount, duration, categoryId}
-    \item Snapshot date: \emph{อย่างน้อย 90 วันหลังเผยแพร่} → ยอดเข้าชม stabilised
+    \item Snapshot date: \emph{อย่างน้อย 90 วันหลังเผยแพร่} $\rightarrow$ ยอดเข้าชม stabilised
     \item ผ่านการ deduplication ตาม \texttt{videoId}
   \end{enumerate}
   \vspace{0.4em}
@@ -389,8 +395,8 @@
 
   \textbf{เหตุผลในการออกแบบ:}
   \begin{itemize}
-    \item \hl{Per-channel z-score} → ลดอคติจากขนาดช่อง
-    \item \hl{Top-decile cutoff} ($Q_{0.9}$) → ตรงกับนิยามทางธุรกิจ ``top 10\%''
+    \item \hl{Per-channel z-score} $\rightarrow$ ลดอคติจากขนาดช่อง
+    \item \hl{Top-decile cutoff} ($Q_{0.9}$) $\rightarrow$ ตรงกับนิยามทางธุรกิจ ``top 10\%''
     \item Class imbalance \hl{$\sim$10\%} positive — สมเหตุสมผล ไม่ trivial เกินไป
     \item $\epsilon = 10^{-6}$ ป้องกัน $0/0$ สำหรับช่องที่มี $\sigma_c = 0$
   \end{itemize}
@@ -442,8 +448,8 @@
     \column{0.5\textwidth}
     \begin{block}{Insight ที่สำคัญ}
       ช่องขนาดต่างกันมี \hl{พฤติกรรมไวรัลต่างกัน}\\
-      → เป็นเหตุผลที่ต้องวิเคราะห์ sub-population\\
-      → จะกลับมาดูใน Results §8
+      $\rightarrow$ เป็นเหตุผลที่ต้องวิเคราะห์ sub-population\\
+      $\rightarrow$ จะกลับมาดูใน Results §8
     \end{block}
     \vspace{0.4em}
     \textbf{ดูเพิ่มเติม:} \emph{Datasheet for Dataset} (Gebru et al.\ 2021) — Appendix E ของวิทยานิพนธ์
@@ -460,7 +466,7 @@
     \item คำนวณ 6 ฟีเจอร์/วิดีโอ:\\
       \texttt{pos\_title, neg\_title, neu\_title, pos\_desc, neg\_desc, neu\_desc}
     \item บันทึกเป็น parquet พร้อม SHA-256 hash ของ source data
-    \item แชร์ระหว่างทุก experiment → reproducible
+    \item แชร์ระหว่างทุก experiment $\rightarrow$ reproducible
   \end{enumerate}
   \vspace{0.4em}
   \begin{block}{ผลลัพธ์}
@@ -496,7 +502,7 @@
   \end{tikzpicture}
   \end{center}
   \begin{itemize}
-    \item Pipeline ทั้งหมด \hl{reproducible} ผ่าน \texttt{make prepare → make train-* → make eval}
+    \item Pipeline ทั้งหมด \hl{reproducible} ผ่าน \texttt{make prepare $\rightarrow$ make train-* $\rightarrow$ make eval}
     \item ทุก run บันทึกใน MLflow พร้อม git SHA + dataset hash
     \item Seed 42 ทุกที่ที่มีความสุ่ม
   \end{itemize}
@@ -602,7 +608,7 @@
   \end{center}
   \vspace{0.4em}
   \begin{center}
-    \scriptsize Kaggle GPU queue ถูกบล็อค $>$6 ชั่วโมง → ย้ายไป HF Jobs เป็นเส้นทางหลัก
+    \scriptsize Kaggle GPU queue ถูกบล็อค $>$6 ชั่วโมง $\rightarrow$ ย้ายไป HF Jobs เป็นเส้นทางหลัก
   \end{center}
 \end{frame}
 
@@ -640,7 +646,7 @@
       \item LR (struct + TF-IDF)
       \item LightGBM (struct)
       \item LightGBM (TF-IDF)
-      \item \hl{LightGBM (struct + TF-IDF)} ← best single
+      \item \hl{LightGBM (struct + TF-IDF)} $\leftarrow$ best single
       \item XGBoost (struct)
       \item XGBoost (TF-IDF)
       \item XGBoost (struct + TF-IDF)
@@ -648,7 +654,7 @@
       \item Hybrid MLP
       \item Hybrid GBM
       \item WangchanBERTa
-      \item \hl{PhayaThaiBERT} ← best encoder
+      \item \hl{PhayaThaiBERT} $\leftarrow$ best encoder
       \item XLM-RoBERTa-large
     \end{enumerate}
     \column{0.45\textwidth}
@@ -666,7 +672,7 @@
     \begin{itemize}
       \item ROC-AUC ทดสอบ \hl{0.6914}\\
         $[0.6625, 0.7174]$
-      \item ECE = \hl{0.016} ← well-calibrated
+      \item ECE = \hl{0.016} $\leftarrow$ well-calibrated
     \end{itemize}
   \end{columns}
 \end{frame}
@@ -714,7 +720,7 @@
   \vspace{0.4em}
   \textbf{Bonferroni correction:}
   \begin{itemize}
-    \item เมื่อทำ pairwise หลายคู่ → adjust $\alpha = 0.05 / \binom{k}{2}$
+    \item เมื่อทำ pairwise หลายคู่ $\rightarrow$ adjust $\alpha = 0.05 / \binom{k}{2}$
   \end{itemize}
 \end{frame}
 
@@ -830,7 +836,7 @@
   \end{itemize}
   \vspace{0.3em}
   \begin{block}{เหตุผลที่ XLM-R-large แพ้}
-    Conneau et al.\ 2020 รายงานว่า Thai ใน CC100 มีเพียง \hl{$\sim$2\%} → \emph{capacity dilution}
+    Conneau et al.\ 2020 รายงานว่า Thai ใน CC100 มีเพียง \hl{$\sim$2\%} $\rightarrow$ \emph{capacity dilution}
   \end{block}
 \end{frame}
 
@@ -851,7 +857,7 @@
 
   \textbf{ข้อสรุป:}
   \begin{itemize}
-    \item ทุกคู่มี $p < 0.001$ หลัง Bonferroni → \hl{ความต่างมีนัยสำคัญทางสถิติ}
+    \item ทุกคู่มี $p < 0.001$ หลัง Bonferroni $\rightarrow$ \hl{ความต่างมีนัยสำคัญทางสถิติ}
     \item Cochran's Q (3 encoders): $Q = 612.69$, $p \approx 9 \times 10^{-134}$
     \item Stacking เหนือกว่า best single (LightGBM) \emph{อย่างมีนัยสำคัญ}
   \end{itemize}
@@ -916,7 +922,7 @@
 
   \textbf{ข้อสังเกตสำคัญ:}
   \begin{itemize}
-    \item สัญญาณ virality \hl{ชัดขึ้นในช่องใหญ่} → AUC สูงกว่าช่องเล็ก 12 จุด
+    \item สัญญาณ virality \hl{ชัดขึ้นในช่องใหญ่} $\rightarrow$ AUC สูงกว่าช่องเล็ก 12 จุด
     \item อาจเป็นเพราะช่องเล็กมีพฤติกรรมไม่สม่ำเสมอ (sparse signal)
     \item \emph{ข้อเสนอแนะเชิงปฏิบัติ:} ใช้ระบบกับช่อง $\geq$1M เป็นหลัก
   \end{itemize}
@@ -956,7 +962,7 @@
   \textbf{ทำไมต้องทำ K-fold?}
   \begin{itemize}
     \item ป้องกัน headline 0.6914 เป็น artefact จากการแบ่งครั้งเดียว
-    \item \hl{GroupKFold} บนระดับช่อง → fold ไม่แชร์ช่องกัน
+    \item \hl{GroupKFold} บนระดับช่อง $\rightarrow$ fold ไม่แชร์ช่องกัน
   \end{itemize}
   \vspace{0.3em}
   \begin{center}
@@ -977,7 +983,7 @@
   \end{center}
   \vspace{0.3em}
   \begin{itemize}
-    \item Headline 0.6914 อยู่ \hl{ภายใน CI} → ไม่ใช่ artefact
+    \item Headline 0.6914 อยู่ \hl{ภายใน CI} $\rightarrow$ ไม่ใช่ artefact
     \item Fold 3 ต่ำกว่ามากเพราะมีช่อง Music ที่ pattern ต่างจาก train
   \end{itemize}
 \end{frame}
@@ -1004,7 +1010,7 @@
     \toprule
     \textbf{Rank} & \textbf{Feature} & \textbf{Mean $|$SHAP$|$} & \textbf{ตีความ}\\
     \midrule
-    1  & \texttt{channel\_subscribers}     & 0.184 & ช่องใหญ่ → ไวรัลง่ายกว่า\\
+    1  & \texttt{channel\_subscribers}     & 0.184 & ช่องใหญ่ $\rightarrow$ ไวรัลง่ายกว่า\\
     2  & \texttt{title\_len}                & 0.097 & ชื่อยาวมีข้อมูลมากกว่า\\
     3  & \texttt{channel\_upload\_freq}     & 0.082 & ความสม่ำเสมอ\\
     4  & \texttt{title\_n\_words}           & 0.071 & เกี่ยวกับ \#1\\
@@ -1058,8 +1064,8 @@
   \]
   \begin{itemize}
     \item Aggregate attention weights ข้าม 12 layers ของ PhayaThaiBERT
-    \item \hl{Normalised} ที่ row level → คงคุณสมบัติของ probability matrix
-    \item Map กลับไปยัง subword level → render HTML highlight
+    \item \hl{Normalised} ที่ row level $\rightarrow$ คงคุณสมบัติของ probability matrix
+    \item Map กลับไปยัง subword level $\rightarrow$ render HTML highlight
   \end{itemize}
   \vspace{0.4em}
   \textbf{สิ่งที่สังเกตได้ในตัวอย่าง 50 อันดับ:}
@@ -1091,7 +1097,7 @@
   \begin{itemize}
     \item Structural model พึ่ง \hl{channel-level} เป็นหลัก
     \item Text-based model (encoder) พึ่ง \hl{attention-grabbing tokens}
-    \item \hl{Stacking ดึงทั้งสองด้านมารวมกัน} → จึงดีกว่าทุก single model
+    \item \hl{Stacking ดึงทั้งสองด้านมารวมกัน} $\rightarrow$ จึงดีกว่าทุก single model
   \end{itemize}
 \end{frame}
 
@@ -1121,7 +1127,7 @@
   \vspace{0.4em}
   \begin{itemize}
     \item \hl{2 ตัวที่สำคัญที่สุด:} LightGBM struct+tfidf และ PhayaThaiBERT
-    \item XLM-R-large ไม่มี marginal contribution → คงเก็บไว้เพื่อ diversity
+    \item XLM-R-large ไม่มี marginal contribution $\rightarrow$ คงเก็บไว้เพื่อ diversity
     \item Stack ทนทาน — ไม่มี base model ไหนทำให้ AUC ลด $>$0.005
   \end{itemize}
 \end{frame}
@@ -1170,8 +1176,8 @@
   \textbf{เหตุผลที่เป็นเช่นนี้:}
   \begin{itemize}
     \item Description ของ Thai YouTube ส่วนใหญ่เป็น \hl{boilerplate} (subscribe link, social handles)
-    \item Information-to-noise ratio ต่ำ → ดึง attention ออกจาก title
-    \item Channel name ทำให้ encoder \hl{cheat} ตามช่อง → ไม่ generalise
+    \item Information-to-noise ratio ต่ำ $\rightarrow$ ดึง attention ออกจาก title
+    \item Channel name ทำให้ encoder \hl{cheat} ตามช่อง $\rightarrow$ ไม่ generalise
   \end{itemize}
   \begin{center}
     \scriptsize \hl{$\Rightarrow$ ค้านสามัญสำนึก แต่รายงานเพื่อความซื่อสัตย์ทางวิชาการ}
@@ -1193,18 +1199,18 @@
   \end{center}
   \vspace{0.4em}
   \begin{itemize}
-    \item HPO grid ขนาดเล็ก (3 trials) → \hl{ผลเหมือนกันภายใน CI}
+    \item HPO grid ขนาดเล็ก (3 trials) $\rightarrow$ \hl{ผลเหมือนกันภายใน CI}
     \item Hyper-parameters ของ BERT มาตรฐาน \hl{ดีพอแล้ว} สำหรับงานนี้
-    \item ไม่คุ้มที่จะลงทุนใน large-scale HPO → ลงทุนกับ \emph{ensemble} ดีกว่า
+    \item ไม่คุ้มที่จะลงทุนใน large-scale HPO $\rightarrow$ ลงทุนกับ \emph{ensemble} ดีกว่า
   \end{itemize}
 \end{frame}
 
 \begin{frame}{10.5 Error Analysis — Top-50 False Positives}
   \textbf{Top FP (วิดีโอที่ predict viral แต่จริง ๆ ไม่ใช่):}
   \begin{itemize}
-    \item ช่อง mega + title attention-grabbing → model มั่นใจสูง
+    \item ช่อง mega + title attention-grabbing $\rightarrow$ model มั่นใจสูง
     \item Trending keyword (เกม/ละครยอดนิยม) แต่ release timing ไม่ดี
-    \item ชื่อมีอิโมจิ + ! แต่เนื้อหา niche → ผู้ชมไม่ตรงกลุ่ม
+    \item ชื่อมีอิโมจิ + ! แต่เนื้อหา niche $\rightarrow$ ผู้ชมไม่ตรงกลุ่ม
   \end{itemize}
   \vspace{0.4em}
   \textbf{Top FN (วิดีโอที่ viral จริง แต่ predict ว่าไม่):}
@@ -1243,14 +1249,14 @@
   \textbf{สำหรับ Content Creator:}
   \begin{itemize}
     \item ลงทุนกับการตั้ง \hl{title} มากกว่า description (ROI สูงกว่ามาก)
-    \item รักษา \hl{upload frequency} สม่ำเสมอ → channel SHAP สำคัญสุด
+    \item รักษา \hl{upload frequency} สม่ำเสมอ $\rightarrow$ channel SHAP สำคัญสุด
     \item ใช้ emoji + ! เป็นกลยุทธ์ แต่ต้องสอดคล้องกับเนื้อหา
   \end{itemize}
   \vspace{0.4em}
   \textbf{สำหรับฝ่ายการตลาด:}
   \begin{itemize}
-    \item Top decile $\sim$10\% → จัด budget allocation
-    \item ใช้ระบบกับ \hl{ช่อง $\geq$1M sub} → AUC สูงกว่าช่องเล็ก
+    \item Top decile $\sim$10\% $\rightarrow$ จัด budget allocation
+    \item ใช้ระบบกับ \hl{ช่อง $\geq$1M sub} $\rightarrow$ AUC สูงกว่าช่องเล็ก
     \item \hl{Calibrated probability} ใช้ตัดสินใจตาม cost matrix ได้จริง
   \end{itemize}
   \vspace{0.4em}
@@ -1286,7 +1292,7 @@
   \end{itemize}
   \vspace{0.4em}
   \begin{block}{Reviewer's Note (จาก REVIEW.md)}
-    ``Honest negative findings preserved'' → เป็นเหตุผลหนึ่งที่ได้ \hl{100/100}
+    ``Honest negative findings preserved'' $\rightarrow$ เป็นเหตุผลหนึ่งที่ได้ \hl{100/100}
   \end{block}
 \end{frame}
 
@@ -1303,7 +1309,7 @@
     \item \hlb{Calibration:} ECE 0.016 — usable probability outputs
     \item \hlb{Triangulated interpretability:} SHAP + LIME + Attention Rollout
     \item \hlb{Datasheet for Dataset} ตาม Gebru et al.\ 2021 — Thai NLP เคสแรก ๆ ที่ทำ
-    \item \hlb{Pipeline reproducible}: \texttt{make prepare → train-* → eval} (\$0.49 total)
+    \item \hlb{Pipeline reproducible}: \texttt{make prepare $\rightarrow$ train-* $\rightarrow$ eval} (\$0.49 total)
     \item \hlb{Honest negative findings} — multi-field, $H_2$, null HPO
   \end{enumerate}
 \end{frame}
@@ -1333,7 +1339,7 @@
     \item \hlb{Temporal model:} ใช้ post-publication 1 ชั่วโมงแรก (early signal)
     \item \hlb{Multi-task learning:} ทำนาย views + likes + comments พร้อมกัน
     \item \hlb{Decoder LLM:} ใช้ Typhoon-2.5 / OpenThaiGPT เป็น zero/few-shot classifier เปรียบเทียบ
-    \item \hlb{Active learning:} เก็บข้อมูลช่องเพิ่ม (จาก 82 → 500+)
+    \item \hlb{Active learning:} เก็บข้อมูลช่องเพิ่ม (จาก 82 $\rightarrow$ 500+)
     \item \hlb{Per-channel fine-tuning:} adapter / LoRA per channel
     \item \hlb{Calibration drift:} re-calibrate ทุก 3 เดือนเพื่อสู้ distribution shift
     \item \hlb{International benchmark:} เปรียบเทียบกับ Trending API ของ YouTube
@@ -1418,7 +1424,7 @@ trainer.train()
     \item \texttt{uv.lock} committed
     \item \texttt{pyproject.toml} pin ทุก direct dep
     \item Model checkpoints saved ใน HF format ที่ \texttt{reports/artifacts/\{model\}/}
-    \item Predictions parquet (\texttt{video\_id, label, prob}) → downstream tests reproducible
+    \item Predictions parquet (\texttt{video\_id, label, prob}) $\rightarrow$ downstream tests reproducible
   \end{itemize}
 \end{frame}
 
@@ -1478,7 +1484,7 @@ trainer.train()
   \end{tabular}
   \vspace{0.6em}
   \begin{center}
-    Hash เหล่านี้ถูก log เข้า MLflow ทุก run → \hl{ตรวจสอบ reproducibility ได้}
+    Hash เหล่านี้ถูก log เข้า MLflow ทุก run $\rightarrow$ \hl{ตรวจสอบ reproducibility ได้}
   \end{center}
 \end{frame}
 
