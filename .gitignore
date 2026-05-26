@@ -10,7 +10,13 @@ data/processed/*
 models/checkpoints/
 mlruns/
 wandb/
-reports/artifacts/models/      # joblib / safetensors model dumps (large)
+# joblib / safetensors model dumps (large)
+reports/artifacts/models/
+# generated explainability HTML directories (per-example renders, large)
+reports/figures/lime/lime_html/
+reports/figures/attention/attention_html/
+# kaggle kernel run outputs (large, regenerable)
+reports/cloud_runs/
 *.ckpt
 *.pt
 *.bin
