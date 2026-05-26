@@ -21,16 +21,16 @@
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
-  Scale=1.1]{THSarabunNew}
+  Scale=1.0]{THSarabunNew}
 \setsansfont[Path=fonts/,
   Extension=.ttf,
   UprightFont=THSarabunNew,
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
-  Scale=1.1]{THSarabunNew}
+  Scale=1.0]{THSarabunNew}
 \newfontfamily\thaifont[Path=fonts/,Extension=.ttf,
-  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.1]{THSarabunNew}
+  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.0]{THSarabunNew}
 % Thai monospace (polyglossia ต้องการ \thaifonttt — ใช้ TH Sarabun เพราะ
 % Latin Modern Mono ไม่รองรับ Thai script)
 \setmonofont[Path=fonts/,Extension=.ttf,
@@ -103,9 +103,26 @@
 % ─── 01 Title ────────────────────────────────────────────────────────
 \begin{frame}[plain]
   \begin{center}
-    \includegraphics[width=2.2cm]{figures/kmitl_logo.png}\\[0.6em]
+    \includegraphics[width=2.0cm]{figures/kmitl_logo.png}\\[0.6em]
+    {\large\bfseries\color{kmitlBlue}
+      การศึกษาเชิงเปรียบเทียบของแบบจำลองทรานส์ฟอร์เมอร์ภาษาไทย\\
+      สำหรับพยากรณ์ความไวรัลของวิดีโอ YouTube
+    }\\[0.5em]
+    {\normalsize\color{kmitlOrange}
+      WangchanBERTa \ \textbullet\ \ PhayaThaiBERT \ \textbullet\ \ XLM-RoBERTa-large
+    }\\[1.2em]
+    {\footnotesize
+      นายตรัยภูรินท์ สืบสุวรรณสาร \ (65050330) \\
+      นายธีรนนท์ ไชยลังกา \ (65050417) \\
+      นายภาณุเดช ภู่โทสนธิ์ \ (65050685)
+    }\\[1.0em]
+    {\scriptsize
+      ภาควิชาสถิติประยุกต์และการวิเคราะห์ข้อมูล \\
+      คณะวิทยาศาสตร์ \ \textbullet\ \ สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง \\[0.4em]
+      อาจารย์ที่ปรึกษา: ผศ.\ ดร.\ พรพิมล ชัยวุฒิศักดิ์ \\[0.4em]
+      ปีการศึกษา 2568
+    }
   \end{center}
-  \titlepage
 \end{frame}
 
 % ─── 02 Outline ──────────────────────────────────────────────────────
@@ -631,32 +648,24 @@
     \item ROC-AUC ดีกว่า class-weight \hl{$+$0.008}
     \item ลด training time \hl{$\sim$60\%}
     \item Calibration ดีกว่า — Platt บน val แก้ probability shift ได้สะอาด
-    \item อ้างอิง: Lipton et al.\ (2014) — undersample เหมาะกับ imbalance moderate (5--20\%)
   \end{itemize}
 \end{frame}
 
 \begin{frame}{5.6 Stacking Ensemble (15 base models)}
   \begin{columns}[T]
     \column{0.55\textwidth}
-    \footnotesize
-    \textbf{15 base models:}
-    \begin{enumerate}\setlength\itemsep{0pt}
-      \item LR (struct)
-      \item LR (TF-IDF)
-      \item LR (struct + TF-IDF)
-      \item LightGBM (struct)
-      \item LightGBM (TF-IDF)
-      \item \hl{LightGBM (struct + TF-IDF)} $\leftarrow$ best single
-      \item XGBoost (struct)
-      \item XGBoost (TF-IDF)
-      \item XGBoost (struct + TF-IDF)
-      \item Channel-prior
-      \item Hybrid MLP
-      \item Hybrid GBM
-      \item WangchanBERTa
-      \item \hl{PhayaThaiBERT} $\leftarrow$ best encoder
-      \item XLM-RoBERTa-large
-    \end{enumerate}
+    \scriptsize
+    \textbf{15 base models:}\\[0.2em]
+    \begin{tabular}{@{}rl@{\quad}rl@{}}
+      1.  & LR (struct)              & 9.  & XGB (struct+TF)\\
+      2.  & LR (TF-IDF)              & 10. & Channel-prior\\
+      3.  & LR (struct+TF)           & 11. & Hybrid MLP\\
+      4.  & LGBM (struct)            & 12. & Hybrid GBM\\
+      5.  & LGBM (TF-IDF)            & 13. & WangchanBERTa\\
+      6.  & \hl{LGBM (struct+TF)} $\leftarrow$ best & 14. & \hl{PhayaThaiBERT} $\leftarrow$ best enc.\\
+      7.  & XGB (struct)             & 15. & XLM-R-large\\
+      8.  & XGB (TF-IDF)             &     & \\
+    \end{tabular}
     \column{0.45\textwidth}
     \textbf{Meta-learner:}
     \[
@@ -994,15 +1003,18 @@
 
 \begin{frame}{9.1 SHAP Global Importance}
   \footnotesize
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{figures/shap_summary.png}
-  \end{center}
-  \begin{itemize}
-    \item \hl{\texttt{channel\_subscribers}} อันดับ 1 — ยืนยัน Hoiles 2017
-    \item \texttt{title\_len} + \texttt{title\_n\_words} อันดับ 2 และ 4
-    \item \texttt{channel\_upload\_frequency} — ความสม่ำเสมอสำคัญ
-    \item TF-IDF features รวมกันเทียบเท่า structural ตัวเดียว
-  \end{itemize}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \includegraphics[height=0.7\textheight,keepaspectratio]{figures/shap_summary.png}
+    \column{0.45\textwidth}
+    \textbf{ข้อสังเกต:}
+    \begin{itemize}
+      \item \hl{\texttt{channel\_subscribers}} อันดับ 1 — ยืนยัน Hoiles 2017
+      \item \texttt{title\_len} + \texttt{title\_n\_words} อันดับ 2 และ 4
+      \item \texttt{channel\_upload\_frequency} — ความสม่ำเสมอสำคัญ
+      \item TF-IDF features รวมกันเทียบเท่า structural ตัวเดียว
+    \end{itemize}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{9.2 SHAP Top-10 Features (LightGBM struct+tfidf)}
@@ -1386,15 +1398,12 @@
 \begin{frame}[fragile]{[Backup] รายละเอียดของ Trainer Loop}
   \scriptsize
   \begin{lstlisting}[language=Python,basicstyle=\ttfamily\tiny]
-from transformers import (
-    AutoModelForSequenceClassification, AutoTokenizer,
-    TrainingArguments, Trainer, set_seed,
-)
+from transformers import (AutoModelForSequenceClassification,
+    AutoTokenizer, TrainingArguments, Trainer, set_seed)
 set_seed(42)
 tok = AutoTokenizer.from_pretrained(cfg.model_name)
 model = AutoModelForSequenceClassification.from_pretrained(
-    cfg.model_name, num_labels=2,
-)
+    cfg.model_name, num_labels=2)
 args = TrainingArguments(
     output_dir=cfg.out_dir, num_train_epochs=3,
     per_device_train_batch_size=cfg.bs,
@@ -1403,14 +1412,10 @@ args = TrainingArguments(
     fp16=torch.cuda.is_available(),
     eval_strategy="epoch", save_strategy="epoch",
     load_best_model_at_end=True, metric_for_best_model="roc_auc",
-    seed=42, report_to=["mlflow"],
-)
-trainer = Trainer(
-    model=model, args=args,
+    seed=42, report_to=["mlflow"])
+trainer = Trainer(model=model, args=args,
     train_dataset=ds_train, eval_dataset=ds_val,
-    processing_class=tok,  # transformers v5
-    compute_metrics=compute_metrics,
-)
+    processing_class=tok, compute_metrics=compute_metrics)
 trainer.train()
   \end{lstlisting}
 \end{frame}
