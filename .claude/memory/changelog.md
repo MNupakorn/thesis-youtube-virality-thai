@@ -55,3 +55,13 @@ Pre-existing. See `git log`.
 - `cfd2795` fix(cloud): parse hf jobs run output for actual 24-hex job_id
 - `94e01fb` fix(cloud): bash -c not -lc in HF jobs run (`-l` was eaten by `--label`)
 - (uncommitted) eval re-run with all 3 encoders. mcnemar_pairwise_encoders.csv + cochrans_q_encoders.csv populated. LIME + attention re-run on PhayaThaiBERT (new top encoder).
+
+## 2026-05-26 (A+ upgrade) · Stacking ensemble + ablations
+
+- (uncommitted at writing) `scripts/train_stacking.py` LR meta-learner over 14-15 base models. Best AUC 0.6914 (+1.86 pt over LightGBM).
+- `scripts/stacking_drop_one.py` drop-one ablation table.
+- Sub-population analysis by channel-size buckets (large 1M+: 0.7459, mid 100k-1M: 0.6273).
+- `configs/train_phaya_multifield.yaml` + new `--train-config` flag in `run_on_hf_jobs.py` for the multi-field PhayaThaiBERT ablation. Negative result kept honestly.
+- `baselines/channel_prior.parquet` channel-mean prior baseline.
+- `stacking/stacking_lr_calibrated.parquet` Platt-calibrated final winner. ECE 0.337 → 0.016.
+- Multi-field text fine-tune support: `build_hf_dataset` now accepts `text_cols` list.

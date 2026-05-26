@@ -105,3 +105,31 @@ Append-only. One entry per training or evaluation run. MLflow is the source of t
   - WangchanBERTa vs XLM-R-large: 930/306, p ≈ 2.9e-70 (Wangchan wins)
 - **Ordering on test set:** PhayaThaiBERT > WangchanBERTa > XLM-R-large.
 - **Headline finding:** all 3 encoders are still beaten by LightGBM with structured + TF-IDF features (0.673 vs 0.645 best encoder). Suggests Thai-YouTube virality is driven more by metadata/structural signals than by title text alone.
+
+### 2026-05-26 · Stacking ensemble (LR meta) + ablations · the A+ push
+
+**Best ensemble:** `stacking_lr_calibrated` — LR over 15 base models, Platt-calibrated.
+- **Test ROC-AUC: 0.6914 [0.6625, 0.7174]** ← new project-best, +1.86 pt over LightGBM (0.6728), +4.6 pt over best encoder PhayaThaiBERT (0.6451)
+- **ECE before / after Platt:** 0.337 → 0.016 (95 % calibration improvement)
+- **Threshold (val-tuned):** 0.1472 for calibrated probas
+
+**Drop-one ablation** (`reports/tables/stacking_drop_one_ablation.csv`):
+- Largest contributors: `baselines/lightgbm_structured_plus_tfidf` (-0.0047), `transformers/phayathaibert` (-0.0041), `baselines/logistic_regression_structured_plus_tfidf` (-0.0030).
+- `transformers/xlm-roberta-large` contributes ~0 — confirms its under-performance.
+- Dropping `xgboost_structured_plus_tfidf` or `xgboost_tfidf` slightly *improves* AUC — they're slight harm.
+
+**Sub-population breakdown** (`reports/tables/stacking_by_channel_size.csv`):
+- Large channels (>1M subs, n=2105): AUC 0.7459 [0.7028, 0.7862]
+- Mid channels (100k-1M, n=1388): AUC 0.6273 [0.5819, 0.6686]
+- Striking ~12 pt gap — viral signal much stronger in big channels (more data per channel, established patterns).
+
+**Pruned ensemble** (top-7 important models, C=0.3): AUC 0.6901 — slightly *worse* than full 15-model. Negative-coef models help via regularization.
+
+**Multi-field PhayaThaiBERT ablation** (`reports/artifacts/predictions/ablation/phayathaibert_multifield.parquet`):
+- Config: text_cols=[title, description, channel_title], max_length=192. HF Job `6a157b055c8d10ffa1101a70`.
+- Test ROC-AUC: 0.5455 — *much worse* than title-only PhayaThaiBERT (0.6451).
+- Honest finding: Thai YouTube descriptions are mostly boilerplate / CTA / cross-promo; longer text adds noise, not signal. Discussion-section material.
+
+**Channel-prior baseline** (`reports/artifacts/predictions/baselines/channel_prior.parquet`):
+- Per-channel mean(label_viral) computed from train videos; applied to test (59/60 train channels appear in test). Anti-correlated with test labels (alone AUC=0.293) due to undersampling-driven bias + popularity decay.
+- Adds ~0 to stacking AUC — train structural features (`log_subscriber_count`, etc.) already capture this.

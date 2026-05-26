@@ -4,23 +4,24 @@
 > Detail lives in `.claude/memory/*.md`. This file is the index.
 
 ## Current State
-- **Phase:** ✅ All 3 encoders trained on HF Jobs (full configs). Eval + Explainability done. Only LaTeX writing remains.
+- **Phase:** ✅ Pipeline + A+ ensemble upgrades done. Only LaTeX writing remains.
 - **Stack:** Python 3.11 · uv · pandas · scikit-learn · LightGBM · XGBoost · PyTorch · transformers v5 · MLflow · Kaggle CLI · HF Jobs · LIME · SHAP
-- **Models:** WangchanBERTa (105M, t4-small, 0.6402), **PhayaThaiBERT (278M, t4-small, 0.6451 ← best encoder)**, XLM-R-large (560M, a10g-small, 0.5450). Total HF cost ≈ $0.25.
+- **Top model:** `stacking/stacking_lr_calibrated` (Platt-calibrated LR over 15 base models) — test ROC-AUC **0.6914 [0.6625, 0.7174]**, ECE 0.016.
+- **Base encoders:** WangchanBERTa (0.6402), PhayaThaiBERT (0.6451, best encoder), XLM-R-large (0.5450). Total HF Jobs cost ≈ $0.35.
 - **Dataset:** 23,431 rows, 82 channels, 10.16% positive rate. Split: train 6,964 (undersampled 3:1) / val 3,143 / test 3,510 (latest 15% by time).
-- **Last commit:** `94e01fb fix(cloud): bash -c not -lc in HF jobs run`
-- **Last updated:** 2026-05-26 (17:22 ICT)
+- **Last commit:** (next push) — stacking ensemble + ablations
+- **Last updated:** 2026-05-26 (18:30 ICT)
 
 ## Latest Session
 - **Goal:** Finish thesis end-to-end (everything except LaTeX).
 - **Status:** ✅ DONE. All 3 encoders + baselines + hybrid evaluated; 3-encoder McNemar + Cochran's Q populated; SHAP/LIME/attention generated; HF Jobs path established as the canonical cloud route.
 
 ## Headline Result
-- **LightGBM (structured+TFIDF) ROC-AUC 0.6728** beats every encoder.
-- **PhayaThaiBERT 0.6451** is the best encoder, > WangchanBERTa 0.6402 > XLM-R-large 0.5450.
-- 3-encoder Cochran's Q: stat=612.69, p ≈ 9.0e-134.
-- Pairwise McNemar all significant (Phaya > Wang > XLM-R).
-- Honest finding: Thai-YouTube virality is dominated by structural/metadata signals, not title text. Discussion-section material.
+- **Top:** `stacking_lr_calibrated` ROC-AUC **0.6914 [0.6625, 0.7174]** — Platt-calibrated LR meta-learner over 15 base models. ECE 0.016.
+- Best single model: `lightgbm_structured_plus_tfidf` 0.6728. Best encoder: PhayaThaiBERT 0.6451 (PhayaThaiBERT > WangchanBERTa > XLM-R-large; Cochran's Q p ≈ 9e-134).
+- Sub-population: stacking AUC 0.7459 on large channels (>1M subs) vs 0.6273 on mid (100k-1M) — viral signal much stronger in big channels.
+- Negative finding: multi-field PhayaThaiBERT (title+description+channel) AUC 0.5455 — adding non-title text *hurts*. Thai YouTube descriptions are mostly boilerplate.
+- Drop-one ablation identifies `lightgbm_structured_plus_tfidf` (-0.0047) and `phayathaibert` (-0.0041) as most-important contributors to the stack.
 
 ## Key Files
 - Canonical input: `data/processed/dataset_with_labels.parquet`
