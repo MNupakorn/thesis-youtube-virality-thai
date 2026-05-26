@@ -133,3 +133,20 @@ Append-only. One entry per training or evaluation run. MLflow is the source of t
 **Channel-prior baseline** (`reports/artifacts/predictions/baselines/channel_prior.parquet`):
 - Per-channel mean(label_viral) computed from train videos; applied to test (59/60 train channels appear in test). Anti-correlated with test labels (alone AUC=0.293) due to undersampling-driven bias + popularity decay.
 - Adds ~0 to stacking AUC — train structural features (`log_subscriber_count`, etc.) already capture this.
+
+### 2026-05-26 · PhayaThaiBERT HPO sweep (3 trials on HF Jobs t4-small)
+
+**All trials underperform the default config — null result, kept honestly.**
+
+| Trial | Config diff | Test ROC-AUC | Δ vs default |
+|---|---|---|---|
+| default | lr=1.0e-5, ep=4 | 0.6451 | — |
+| lr5e6_ep6 | lr=5.0e-6, ep=6 | 0.6414 | -0.0037 |
+| lr2e5_ep4 | lr=2.0e-5, ep=4 | 0.6437 | -0.0014 |
+| lr1e5_ep6 | lr=1.0e-5, ep=6, warmup=0.06 | 0.6448 | -0.0003 |
+
+**Job IDs:** 6a15851f5c8d10ffa1101b25, 6a1585225c8d10ffa1101b29, 6a1585255c8d10ffa1101b2b.
+**Output repos:** `MGodK/thesis-output-phaya-{trial}-20260526`.
+**Predictions saved:** `reports/artifacts/predictions/ablation/hpo/phaya_*.parquet`.
+
+**Interpretation:** the default config (4 epochs, lr=1e-5, warmup_ratio=0.10, batch=16/grad_accum=2) is at or near the local optimum for this task. Longer training overfits; aggressive LR causes instability; longer training with smaller warmup gains nothing. Reinforces the claim that the encoder upper-bound on title-only Thai-YouTube virality classification is around 0.645 ROC-AUC.
