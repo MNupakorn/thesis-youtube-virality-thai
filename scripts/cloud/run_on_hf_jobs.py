@@ -163,8 +163,15 @@ def submit_job(
     sys.stderr.write(res.stderr)
     if res.returncode != 0:
         raise SystemExit("hf jobs run failed")
-    # job_id is the last non-empty token on stdout
-    job_id = next(line.strip() for line in res.stdout.splitlines()[::-1] if line.strip())
+    # Parse job_id from "Job started with ID: <id>" line; fallback: any 24-hex token.
+    import re as _re
+    output = res.stdout + res.stderr
+    m = _re.search(r"Job started with ID:\s*([a-f0-9]{24})", output)
+    if not m:
+        m = _re.search(r"\b([a-f0-9]{24})\b", output)
+    if not m:
+        raise SystemExit(f"could not parse job_id from output:\n{output}")
+    job_id = m.group(1)
     log.info(f"job_id = {job_id}")
     return job_id
 
