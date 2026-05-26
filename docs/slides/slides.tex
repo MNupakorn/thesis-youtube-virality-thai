@@ -21,16 +21,16 @@
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
-  Scale=1.2]{THSarabunNew}
+  Scale=1.1]{THSarabunNew}
 \setsansfont[Path=fonts/,
   Extension=.ttf,
   UprightFont=THSarabunNew,
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
-  Scale=1.2]{THSarabunNew}
+  Scale=1.1]{THSarabunNew}
 \newfontfamily\thaifont[Path=fonts/,Extension=.ttf,
-  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.2]{THSarabunNew}
+  UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.1]{THSarabunNew}
 % Thai monospace (polyglossia ต้องการ \thaifonttt — ใช้ TH Sarabun เพราะ
 % Latin Modern Mono ไม่รองรับ Thai script)
 \setmonofont[Path=fonts/,Extension=.ttf,
@@ -893,7 +893,7 @@
 
 \begin{frame}{7.7 Reliability Diagram (Stacking)}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{figures/reliability_stacking.png}
+    \includegraphics[width=0.55\textwidth]{figures/reliability_stacking.png}
   \end{center}
   \begin{itemize}
     \item Predicted prob ใกล้กับ observed frequency มาก (ค่า ECE $=$ 0.016)
@@ -993,8 +993,9 @@
 % =====================================================================
 
 \begin{frame}{9.1 SHAP Global Importance}
+  \footnotesize
   \begin{center}
-    \includegraphics[width=0.75\textwidth]{figures/shap_summary.png}
+    \includegraphics[width=0.5\textwidth]{figures/shap_summary.png}
   \end{center}
   \begin{itemize}
     \item \hl{\texttt{channel\_subscribers}} อันดับ 1 — ยืนยัน Hoiles 2017
@@ -1106,7 +1107,7 @@
 % =====================================================================
 
 \begin{frame}{10.1 Ablation: Drop-one Base Model}
-  \footnotesize
+  \scriptsize
   \begin{tabular}{lrr}
     \toprule
     \textbf{Base model ที่ตัดออก} & \textbf{Stacking AUC} & \textbf{$\Delta$ vs full}\\
@@ -1382,9 +1383,9 @@
 % ===== Backup slides for anticipated Q&A =====
 \appendix
 
-\begin{frame}{[Backup] รายละเอียดของ Trainer Loop}
-  \footnotesize
-  \begin{lstlisting}[language=Python]
+\begin{frame}[fragile]{[Backup] รายละเอียดของ Trainer Loop}
+  \scriptsize
+  \begin{lstlisting}[language=Python,basicstyle=\ttfamily\tiny]
 from transformers import (
     AutoModelForSequenceClassification, AutoTokenizer,
     TrainingArguments, Trainer, set_seed,
