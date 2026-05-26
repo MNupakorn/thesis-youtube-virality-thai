@@ -3,7 +3,7 @@
 Mirror of ``build_kaggle_dataset.py`` for the HF Jobs cloud path. The HF Jobs
 driver mounts this dataset read-only at ``/data`` inside the job container.
 
-Default repo id: ``mknpk01/thesis-virality-data`` (private).
+Default repo id: ``MGodK/thesis-virality-data`` (private).
 
 Usage::
 
@@ -25,7 +25,7 @@ from src.utils import project_root, setup_logger
 
 log = setup_logger("scripts.cloud.build_hf_dataset")
 
-DEFAULT_REPO = "mknpk01/thesis-virality-data"
+DEFAULT_REPO = "MGodK/thesis-virality-data"
 
 FILES = [
     Path("data/processed/dataset_with_labels.parquet"),

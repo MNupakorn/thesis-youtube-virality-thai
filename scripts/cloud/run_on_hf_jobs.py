@@ -17,7 +17,7 @@ What the job does on HF infrastructure:
 1. Clones the repo at the pinned SHA.
 2. Installs deps via ``uv pip install --system -e ".[dev]"``.
 3. Downloads the input data from ``HF_INPUT_DATASET`` (default
-   ``mknpk01/thesis-virality-data``) into the canonical paths.
+   ``MGodK/thesis-virality-data``) into the canonical paths.
 4. Runs ``scripts/train_transformer.py --model X --config configs/train.yaml``.
 5. Uploads predictions + checkpoint to ``HF_OUTPUT_REPO`` (a private dataset
    repo named ``mknpk01/thesis-output-{model}-{date}``).
@@ -44,8 +44,8 @@ from src.utils import ensure_dir, project_root, setup_logger
 log = setup_logger("scripts.cloud.run_on_hf_jobs")
 
 REPO_URL = "https://github.com/MNupakorn/thesis-youtube-virality-thai.git"
-DEFAULT_INPUT_DATASET = "mknpk01/thesis-virality-data"
-DEFAULT_NAMESPACE = "mknpk01"
+DEFAULT_INPUT_DATASET = "MGodK/thesis-virality-data"
+DEFAULT_NAMESPACE = "MGodK"
 DEFAULT_IMAGE = "pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime"
 POLL_SECONDS = 30
 POLL_TIMEOUT_MIN = 240  # 4 h hard cap
