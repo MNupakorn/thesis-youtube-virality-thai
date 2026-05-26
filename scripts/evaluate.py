@@ -97,7 +97,7 @@ def main() -> None:
         test_probs[name] = test
 
     metrics_df = pd.DataFrame(rows).sort_values("roc_auc", ascending=False)
-    metrics_df.to_csv(tables_dir + "/all_models_metrics.csv", index=False)
+    metrics_df.to_csv(tables_dir / "all_models_metrics.csv", index=False)
     log.info(f"per-model test metrics:\n{metrics_df.to_string(index=False)}")
 
     # ---- Statistical tests on the COMMON test rows -------------------------
@@ -123,7 +123,7 @@ def main() -> None:
         # Pairwise McNemar
         if eval_cfg["stats_tests"]["mcnemars"]["enabled"]:
             mc = mcnemar_pairwise(y_true, proba_dict)
-            mc.to_csv(tables_dir + "/mcnemar_pairwise.csv", index=False)
+            mc.to_csv(tables_dir / "mcnemar_pairwise.csv", index=False)
             log.info(f"mcnemar pairwise:\n{mc.to_string(index=False)}")
 
         # Cochran's Q (3+ models only)
@@ -132,7 +132,7 @@ def main() -> None:
             and len(proba_dict) >= eval_cfg["stats_tests"]["cochrans_q"]["apply_when_n_models_ge"]
         ):
             cq = cochrans_q_test(y_true, proba_dict)
-            pd.DataFrame([cq]).to_csv(tables_dir + "/cochrans_q.csv", index=False)
+            pd.DataFrame([cq]).to_csv(tables_dir / "cochrans_q.csv", index=False)
             log.info(f"cochran's Q: {cq}")
 
     # ---- Calibration on top model -----------------------------------------
@@ -156,9 +156,9 @@ def main() -> None:
             rc = reliability_curve(p_test, test["y_true"].to_numpy(), n_bins=eval_cfg["calibration"]["bins"])
             rows.append({"calibrator": name, "ece": ece})
             pd.DataFrame(rc, columns=["mean_conf", "mean_acc", "n"]).to_csv(
-                tables_dir + f"/calibration_{top_model.replace('/', '_')}_{name}.csv", index=False
+                tables_dir / f"calibration_{top_model.replace('/', '_')}_{name}.csv", index=False
             )
-        pd.DataFrame(rows).to_csv(tables_dir + "/calibration_summary.csv", index=False)
+        pd.DataFrame(rows).to_csv(tables_dir / "calibration_summary.csv", index=False)
         log.info(f"calibration summary saved")
 
     # ---- Per-category breakdown -------------------------------------------
@@ -177,7 +177,7 @@ def main() -> None:
             m = compute_metrics(sub["y_true"].to_numpy(), sub["y_proba"].to_numpy())
             rows.append({"category_id": cid, "category_title": sub["category_title"].iloc[0], "n": len(sub), **m})
         pd.DataFrame(rows).sort_values("roc_auc", ascending=False).to_csv(
-            tables_dir + "/per_category_breakdown.csv", index=False
+            tables_dir / "per_category_breakdown.csv", index=False
         )
 
     log.info(f"evaluation complete; results in {tables_dir} / {fig_dir}")
