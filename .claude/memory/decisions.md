@@ -90,3 +90,17 @@ If a decision changes, add a new entry below with a new date, and at the top of 
 > **Reason:** [one paragraph]
 
 Never delete the old entry. The audit trail is the point.
+
+## 2026-05-26 · Known bug: train_hybrid.py silently skips GBM block when MLP runs first
+
+**Decision:** Acknowledged but **not patched**. Workaround documented.
+
+**Symptom:** Running `scripts/train_hybrid.py` end-to-end: MLP block finishes, prints `hybrid_mlp test: ...`, saves `mlp_state_dict.joblib` + `feature_names.joblib`, then the process exits cleanly (exit 0) **without ever entering the GBM block**, despite `also_train_gbm_head: true`.
+
+**Diagnosis:** Likely a segfault inside `train_gbm_head` when invoked inside an MLflow run context immediately after MPS-backed PyTorch work in a preceding run. Reproduces deterministically on macOS arm64 (M1) + transformers v5 + lightgbm 4.x + mlflow file backend. Running `train_gbm_head` in isolation (no preceding MPS work) completes in ~10 s.
+
+**Workaround (current):** GBM head trained out-of-band with a one-liner that calls `train_gbm_head` + `save_hybrid_artifacts` directly. `X_test.npy` / `y_test.npy` saved by a separate snippet. All downstream consumers (SHAP, evaluate) are unblocked.
+
+**Proper fix later:** split MLP and GBM into two scripts, or explicitly clear MPS state (`torch.mps.empty_cache(); del mlp_state`) between blocks before re-running the hybrid pipeline on revised data.
+
+---

@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.evaluation.calibration import (
@@ -179,6 +180,93 @@ def main() -> None:
         pd.DataFrame(rows).sort_values("roc_auc", ascending=False).to_csv(
             tables_dir / "per_category_breakdown.csv", index=False
         )
+
+    # ---- ROC / PR curves (top 6 by ROC-AUC) -------------------------------
+    if not metrics_df.empty:
+        try:
+            import matplotlib
+
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+            from sklearn.metrics import auc as sk_auc
+            from sklearn.metrics import precision_recall_curve, roc_curve
+
+            top_models = metrics_df["model"].head(6).tolist()
+            fig, (ax_roc, ax_pr) = plt.subplots(1, 2, figsize=(14, 5))
+            for name in top_models:
+                tp = test_probs[name]
+                y = tp["y_true"].to_numpy()
+                p = tp["y_proba"].to_numpy()
+                fpr, tpr, _ = roc_curve(y, p)
+                pre, rec, _ = precision_recall_curve(y, p)
+                ax_roc.plot(fpr, tpr, label=f"{name} (AUC={sk_auc(fpr, tpr):.3f})", lw=1.4)
+                ax_pr.plot(rec, pre, label=f"{name} (AP={sk_auc(rec, pre):.3f})", lw=1.4)
+            ax_roc.plot([0, 1], [0, 1], "--", color="gray", lw=0.8)
+            ax_roc.set(xlabel="FPR", ylabel="TPR", title="ROC (test) — top 6 by AUC")
+            ax_pr.set(xlabel="Recall", ylabel="Precision", title="PR (test) — top 6 by AUC")
+            ax_roc.legend(fontsize=7, loc="lower right")
+            ax_pr.legend(fontsize=7, loc="upper right")
+            ax_roc.grid(alpha=0.3)
+            ax_pr.grid(alpha=0.3)
+            plt.tight_layout()
+            plt.savefig(fig_dir / "roc_pr_test.svg")
+            plt.savefig(fig_dir / "roc_pr_test.png", dpi=140)
+            plt.close()
+            log.info(f"ROC/PR curves saved to {fig_dir}")
+        except Exception as e:
+            log.warning(f"ROC/PR figure failed: {e}")
+
+    # ---- Reliability diagram for top model --------------------------------
+    if eval_cfg["calibration"]["enabled"] and not metrics_df.empty:
+        try:
+            import matplotlib
+
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+
+            top_model = metrics_df.iloc[0]["model"]
+            df_top = preds_by_model[top_model]
+            test = df_top[df_top["split"] == "test"]
+            n_bins = eval_cfg["calibration"]["bins"]
+            rc = reliability_curve(test["y_proba"].to_numpy(), test["y_true"].to_numpy(), n_bins=n_bins)
+            mc = np.array([r[0] for r in rc])
+            ma = np.array([r[1] for r in rc])
+            fig, ax = plt.subplots(figsize=(6, 6))
+            ax.plot([0, 1], [0, 1], "--", color="gray", lw=0.8, label="perfect")
+            ax.plot(mc, ma, "o-", lw=1.4, label=top_model)
+            ax.set(
+                xlabel="mean predicted prob.",
+                ylabel="empirical positive rate",
+                title=f"Reliability diagram — {top_model}",
+            )
+            ax.legend(fontsize=8)
+            ax.grid(alpha=0.3)
+            plt.tight_layout()
+            plt.savefig(fig_dir / "calibration_top_model.svg")
+            plt.savefig(fig_dir / "calibration_top_model.png", dpi=140)
+            plt.close()
+            log.info("reliability diagram saved")
+        except Exception as e:
+            log.warning(f"reliability figure failed: {e}")
+
+    # ---- Error analysis: top-50 FP / FN by confidence ---------------------
+    if not metrics_df.empty:
+        top_model = metrics_df.iloc[0]["model"]
+        df_top = preds_by_model[top_model]
+        meta_cols = [
+            c for c in ("video_id", "title", "channel_title", "category_title", "view_count")
+            if c in df.columns
+        ]
+        test = df_top[df_top["split"] == "test"].merge(
+            df[meta_cols].drop_duplicates("video_id"), on="video_id", how="left"
+        )
+        thr = float(metrics_df.iloc[0].get("threshold", 0.5))
+        test = test.assign(predicted=(test["y_proba"] >= thr).astype(int))
+        fp = test[(test["predicted"] == 1) & (test["y_true"] == 0)].nlargest(50, "y_proba")
+        fn = test[(test["predicted"] == 0) & (test["y_true"] == 1)].nsmallest(50, "y_proba")
+        fp.to_csv(tables_dir / f"errors_top_fp_{top_model.replace('/', '_')}.csv", index=False)
+        fn.to_csv(tables_dir / f"errors_top_fn_{top_model.replace('/', '_')}.csv", index=False)
+        log.info(f"error analysis: top-50 FP / FN of {top_model} saved")
 
     log.info(f"evaluation complete; results in {tables_dir} / {fig_dir}")
 
