@@ -1,4 +1,4 @@
-.PHONY: help install data prepare train-baselines train-wangchan train-phaya train-xlmr train-hybrid train-all train-cloud-wangchan train-cloud-phaya train-cloud-xlmr train-cloud-all kaggle-dataset eval explain clean lint test
+.PHONY: help install data prepare train-baselines train-wangchan train-phaya train-xlmr train-hybrid train-all train-cloud-wangchan train-cloud-phaya train-cloud-xlmr train-cloud-all kaggle-dataset hf-dataset train-hf-wangchan train-hf-phaya train-hf-xlmr train-hf-all-detached eval explain clean lint test
 
 PY := uv run python
 CONFIG_DATA := configs/data.yaml
@@ -23,6 +23,12 @@ help:
 	@echo "  train-cloud-phaya    Push & poll Kaggle kernel for PhayaThaiBERT"
 	@echo "  train-cloud-xlmr     Push & poll Kaggle kernel for XLM-RoBERTa-large"
 	@echo "  train-cloud-all      All three encoders, sequential (Kaggle limits concurrency)"
+	@echo "  ---  Cloud (HF Jobs — pay-as-you-go, requires PRO + 'hf auth login') ---"
+	@echo "  hf-dataset           Upload data files to HF private dataset"
+	@echo "  train-hf-wangchan    Submit + poll WangchanBERTa job on HF (default t4-small)"
+	@echo "  train-hf-phaya       Submit + poll PhayaThaiBERT job on HF"
+	@echo "  train-hf-xlmr        Submit + poll XLM-RoBERTa-large job (a10g-small)"
+	@echo "  train-hf-all-detached  Submit all 3 jobs detached; poll each with --poll-only"
 	@echo "  ---"
 	@echo "  eval                 Run full evaluation incl. McNemar / Cochran's Q"
 	@echo "  explain              Generate SHAP / LIME / attention artifacts"
@@ -70,6 +76,24 @@ train-cloud-xlmr:
 	$(PY) scripts/cloud/run_on_kaggle.py --model xlm-roberta-large
 
 train-cloud-all: train-cloud-wangchan train-cloud-phaya train-cloud-xlmr
+
+# --- HF Jobs path (preferred when Kaggle pool is congested) ---
+hf-dataset:
+	$(PY) -m scripts.cloud.build_hf_dataset
+
+train-hf-wangchan:
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model wangchanberta
+
+train-hf-phaya:
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model phayathaibert
+
+train-hf-xlmr:
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model xlm-roberta-large --flavor a10g-small
+
+train-hf-all-detached:
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model wangchanberta --push-only
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model phayathaibert --push-only
+	$(PY) -m scripts.cloud.run_on_hf_jobs --model xlm-roberta-large --push-only --flavor a10g-small
 
 eval:
 	$(PY) scripts/evaluate.py --config $(CONFIG_EVAL)
