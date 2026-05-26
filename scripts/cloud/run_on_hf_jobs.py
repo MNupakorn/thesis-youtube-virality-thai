@@ -85,6 +85,7 @@ def build_bash_command(
     sha: str,
     input_dataset: str,
     output_repo: str,
+    train_config: str = "configs/train.yaml",
 ) -> str:
     """The bash command executed on HF Jobs. Single-string for `hf jobs run`."""
     return (
@@ -108,7 +109,7 @@ def build_bash_command(
         "    shutil.copy(f'/tmp/in/{f}', f'data/interim/{f}')\n"
         "print('data staged')\n"
         "PY\n"
-        f"python scripts/train_transformer.py --model {model} --config configs/train.yaml\n"
+        f"python scripts/train_transformer.py --model {model} --config {train_config}\n"
         "mkdir -p /tmp/out\n"
         "cp -r reports/artifacts/predictions /tmp/out/\n"
         "cp -r reports/artifacts/models /tmp/out/\n"
@@ -134,9 +135,10 @@ def submit_job(
     timeout: str,
     input_dataset: str,
     output_repo: str,
+    train_config: str = "configs/train.yaml",
 ) -> str:
     """Submit a detached HF Job. Returns the job_id."""
-    cmd_str = build_bash_command(model, sha, input_dataset, output_repo)
+    cmd_str = build_bash_command(model, sha, input_dataset, output_repo, train_config)
     args = [
         "uv",
         "run",
@@ -165,6 +167,7 @@ def submit_job(
         raise SystemExit("hf jobs run failed")
     # Parse job_id from "Job started with ID: <id>" line; fallback: any 24-hex token.
     import re as _re
+
     output = res.stdout + res.stderr
     m = _re.search(r"Job started with ID:\s*([a-f0-9]{24})", output)
     if not m:
@@ -256,6 +259,11 @@ def main() -> None:
     )
     ap.add_argument("--namespace", default=DEFAULT_NAMESPACE)
     ap.add_argument(
+        "--train-config",
+        default="configs/train.yaml",
+        help="config YAML path inside the cloned repo for train_transformer.py",
+    )
+    ap.add_argument(
         "--push-only",
         action="store_true",
         help="submit + exit; persist the job_id for later --poll-only",
@@ -291,6 +299,7 @@ def main() -> None:
             timeout=args.timeout,
             input_dataset=args.input_dataset,
             output_repo=output_repo,
+            train_config=args.train_config,
         )
         state_path.write_text(
             json.dumps(

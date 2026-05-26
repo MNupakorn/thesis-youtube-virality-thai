@@ -1,5 +1,5 @@
 """Fine-tune Thai transformers (WangchanBERTa full FT, Typhoon / OpenThaiGPT via QLoRA)
-   for binary virality classification on titles.
+for binary virality classification on titles.
 """
 
 from __future__ import annotations
@@ -23,19 +23,45 @@ def _has_cuda() -> bool:
     except ImportError:
         return False
 
+
 log = setup_logger("models.transformer_finetune")
 
 
-def build_hf_dataset(df: pd.DataFrame, text_col: str = "title", label_col: str = "label_viral"):
-    """Convert a pandas DataFrame to a 🤗 Datasets DatasetDict keyed by split."""
+def build_hf_dataset(
+    df: pd.DataFrame,
+    text_cols: list[str] | str = "title",
+    label_col: str = "label_viral",
+    sep: str = " [SEP] ",
+):
+    """Convert a pandas DataFrame to a 🤗 Datasets DatasetDict.
+
+    If `text_cols` is a list, the values are concatenated with `sep` (default
+    " [SEP] ") so a single 'text' field combines e.g. title + description +
+    channel name. Empty / NaN cells are skipped (no leading/trailing seps).
+    """
     from datasets import Dataset, DatasetDict
+
+    if isinstance(text_cols, str):
+        text_cols = [text_cols]
+
+    def join_row(row) -> str:
+        parts = []
+        for c in text_cols:
+            v = row.get(c)
+            if v is None:
+                continue
+            s = str(v).strip()
+            if s and s.lower() != "nan":
+                parts.append(s)
+        return sep.join(parts)
 
     splits = {}
     for sp in df["split"].unique():
         sub = df[df["split"] == sp]
+        texts = sub.apply(join_row, axis=1).tolist()
         splits[sp] = Dataset.from_dict(
             {
-                "text": sub[text_col].fillna("").astype(str).tolist(),
+                "text": texts,
                 "labels": sub[label_col].astype(int).tolist(),
                 "video_id": sub["video_id"].astype(str).tolist(),
             }
@@ -158,7 +184,9 @@ def _build_trainer_full_ft(
         processing_class=tokenizer,
         data_collator=collator,
         compute_metrics=_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=cfg.get("early_stopping_patience", 2))],
+        callbacks=[
+            EarlyStoppingCallback(early_stopping_patience=cfg.get("early_stopping_patience", 2))
+        ],
     )
     return trainer, tokenizer
 
@@ -284,7 +312,9 @@ def _build_trainer_qlora(
         processing_class=tokenizer,
         data_collator=collator,
         compute_metrics=_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=cfg.get("early_stopping_patience", 2))],
+        callbacks=[
+            EarlyStoppingCallback(early_stopping_patience=cfg.get("early_stopping_patience", 2))
+        ],
     )
     return trainer, tokenizer
 
@@ -305,7 +335,7 @@ def fine_tune(
     'typhoon-2.5' / 'openthaigpt' (kept for reproducibility of the original
     thesis design).
     """
-    ds = build_hf_dataset(df)
+    ds = build_hf_dataset(df, text_cols=cfg.get("text_cols", "title"))
     pretrained = cfg["pretrained_name"]
     num_labels = cfg.get("num_labels", 2)
 
@@ -329,7 +359,9 @@ def fine_tune(
         if sp not in ds:
             continue
         sub_ds = ds[sp].map(
-            lambda b: tokenizer(b["text"], truncation=True, max_length=cfg["max_length"], padding=False),
+            lambda b: tokenizer(
+                b["text"], truncation=True, max_length=cfg["max_length"], padding=False
+            ),
             batched=True,
             remove_columns=["text", "video_id"],
         )
