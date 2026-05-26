@@ -69,3 +69,39 @@ Append-only. One entry per training or evaluation run. MLflow is the source of t
 
 - **M1 status:** Not attempted; would OOM (>10 GB needed for fp32).
 - **Recommended infra:** HF Jobs `--flavor a10g-large` or A100.
+
+### 2026-05-26 · wangchanberta · title · focal · HF Jobs t4-small (full config 5 epoch)
+
+- **Job ID:** `6a156bd8f17429a271eee137` on HF Jobs (`t4-small`, ~$0.40/h)
+- **Config:** `configs/train.yaml` (full: epochs=5, batch=32, max_len=64, fp16)
+- **Test metrics:** ROC-AUC 0.6402 [0.6100, 0.6699], f1_pos 0.197, threshold 0.422
+- **Output repo:** `MGodK/thesis-output-wangchanberta-20260526`
+- **Predictions:** `reports/artifacts/predictions/transformers/wangchanberta.parquet`
+- **Note:** Replaces the M1-reduced 3-epoch run from earlier today.
+
+### 2026-05-26 · phayathaibert · title · focal · HF Jobs t4-small (full config 4 epoch)
+
+- **Job ID:** `6a156bda404eb93b204f23d2` on HF Jobs (`t4-small`)
+- **Config:** `configs/train.yaml` (epochs=4, batch=16, grad_accum=2, max_len=96, fp16)
+- **Best checkpoint:** `checkpoint-872` (val_roc_auc 0.5938)
+- **Test metrics:** ROC-AUC 0.6451 [0.6143, 0.6757], f1_pos 0.203, threshold 0.461
+- **Output repo:** `MGodK/thesis-output-phayathaibert-20260526`
+- **Best of the three encoders.**
+
+### 2026-05-26 · xlm-roberta-large · title · focal · HF Jobs a10g-small (full config 4 epoch)
+
+- **Job ID:** `6a156bddf17429a271eee139` on HF Jobs (`a10g-small`, ~$1.00/h)
+- **Config:** `configs/train.yaml` (epochs=4, batch=8, grad_accum=4, gradient_checkpointing, fp16)
+- **Test metrics:** ROC-AUC 0.5450 [0.5110, 0.5775], f1_pos 0.166, threshold 0.500
+- **Output repo:** `MGodK/thesis-output-xlm-roberta-large-20260526`
+- **Note:** Significantly worse than the Thai-specific encoders. Multilingual model under-fits the Thai title distribution at this sample size.
+
+### 2026-05-26 · 3-encoder comparison (the thesis headline)
+
+- **Cochran's Q:** stat=612.69, df=2, p ≈ 9.0e-134 → encoders differ.
+- **Pairwise McNemar (b/w-corrected):**
+  - PhayaThaiBERT vs WangchanBERTa: 450/303, p ≈ 1.0e-7 (Phaya wins)
+  - PhayaThaiBERT vs XLM-R-large: 1032/261, p ≈ 1.0e-101 (Phaya wins)
+  - WangchanBERTa vs XLM-R-large: 930/306, p ≈ 2.9e-70 (Wangchan wins)
+- **Ordering on test set:** PhayaThaiBERT > WangchanBERTa > XLM-R-large.
+- **Headline finding:** all 3 encoders are still beaten by LightGBM with structured + TF-IDF features (0.673 vs 0.645 best encoder). Suggests Thai-YouTube virality is driven more by metadata/structural signals than by title text alone.

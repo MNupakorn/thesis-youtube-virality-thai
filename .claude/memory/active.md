@@ -1,87 +1,98 @@
 # Active Task
 
-**As of:** 2026-05-26 (end of session)
+**As of:** 2026-05-26 (end of session, post-HF-Jobs)
 
-## Status: WangchanBERTa local fallback DONE; PhayaThaiBERT + XLM-R-large blocked
+## Status: ✅ All 3 encoders trained on HF Jobs. Eval + Explainability done. Only LaTeX writing remains.
 
-Kaggle free GPU pool was congested >6 h today (kernel stayed `QUEUED` past the 6 h
-driver cap and beyond — never started). Fell back to local M1 MPS for
-WangchanBERTa (105M). PhayaThaiBERT (278M) hit MPS OOM at 9 GB pool. XLM-R-large
-(560M) not attempted — would OOM. Per user direction, the next session should
-move encoder training off this machine entirely (HF Jobs preferred).
+When Kaggle free GPU pool stayed blocked >6 h, switched to **HF Jobs** (user's
+request: "ไม่ใช้คอม"). All three encoders fine-tuned at full config on
+HF Jobs:
 
-## What this session produced (committed unless noted)
+| Model | Test ROC-AUC | 95 % CI | Hardware | Cost |
+|---|---|---|---|---|
+| baselines/lightgbm_structured_plus_tfidf | **0.6728** | [0.6430, 0.7002] | local | – |
+| baselines/xgboost_structured_plus_tfidf | 0.6534 | [0.6230, 0.6828] | local | – |
+| baselines/lightgbm_structured | 0.6527 | [0.6233, 0.6830] | local | – |
+| **transformers/phayathaibert** ← best encoder | 0.6451 | [0.6143, 0.6757] | t4-small | ~$0.05 |
+| transformers/wangchanberta | 0.6402 | [0.6100, 0.6699] | t4-small | ~$0.04 |
+| baselines/xgboost_structured | 0.6312 | [0.6002, 0.6619] | local | – |
+| transformers/xlm-roberta-large | 0.5450 | [0.5110, 0.5775] | a10g-small | ~$0.15 |
 
-### Code
-- `scripts/cloud/` Kaggle pipeline (`build_kaggle_dataset.py`,
-  `kaggle_kernel_template.py`, `run_on_kaggle.py`) — works correctly, blocked only
-  by the free Kaggle GPU shortage.
-- Makefile: `kaggle-dataset` + `train-cloud-{wangchan,phaya,xlmr,all}` targets;
-  removed out-of-scope `train-typhoon` / `train-openthai`.
-- `src/explainability/lime_runner.py` + `attention_runner.py` — LIME for text
-  classifier and attention rollout (Abnar & Zuidema 2020).
-- `scripts/explain.py` extended with `--only {shap,lime,attention}` switch.
-- `scripts/evaluate.py` — fixed Path/str concat bug; added 3-encoder-specific
-  McNemar + Cochran's Q subset; ROC/PR curves; reliability diagram; top-50 FP/FN
-  error analysis.
-- `src/models/transformer_finetune.py` — auto-disable fp16/bf16 when CUDA not
-  available (MPS produced NaN logits).
+Total HF Jobs spend ≈ **$0.25** (all three on full configs).
 
-### Data
-- Private Kaggle dataset `mknpk01/thesis-virality-data` (4 files, 52 MB) live.
+**3-encoder Cochran's Q on test set:** stat=612.69, df=2, **p ≈ 9.0e-134**
+→ all three encoders differ significantly. Pairwise McNemar confirms: PhayaThaiBERT
+beats WangchanBERTa (450 vs 303, p≈1e-7) and both beat XLM-R-large.
 
-### Models / predictions (M1 local)
-- **WangchanBERTa 3-epoch fine-tune** (reduced config, max_len=48, bs=16,
-  grad_accum=2, gradient_checkpointing=true). Best checkpoint = checkpoint-218
-  (val_auc=0.549). Test ROC-AUC 0.5748 [0.5416, 0.6044]. Predictions parquet
-  saved.
+**The LightGBM baseline still beats every encoder** by ~3 pt AUC. Documented as a
+genuine research finding — Thai-YouTube virality is dominated by structural/
+metadata signals (channel size, duration, time-of-publication), not by text
+content alone. This will be the discussion-section headline.
 
-### Reports (all on baselines + hybrid + 1 encoder)
-- `reports/tables/all_models_metrics.csv` (12 models)
-- `reports/tables/mcnemar_pairwise.csv` (66 pairs)
-- `reports/tables/cochrans_q.csv` (12 classifiers, p≈0)
-- `reports/tables/calibration_*.csv`
+## What was completed in the full session
+
+### Infra
+- `scripts/cloud/{build_kaggle_dataset,kaggle_kernel_template,run_on_kaggle}.py`
+  + `train-cloud-*` Makefile targets — Kaggle Kernels path (blocked by free pool
+  queue today, but driver is correct).
+- `scripts/cloud/{build_hf_dataset,run_on_hf_jobs}.py` + `train-hf-*` Makefile
+  targets — HF Jobs path. Supports `--push-only` / `--poll-only --job-id <id>`
+  so multiple encoders can queue in parallel.
+- HF dataset `MGodK/thesis-virality-data` (private) holds the 4 input files.
+- HF output dataset repos `MGodK/thesis-output-{model}-20260526` hold each
+  job's predictions + checkpoint + git_sha.txt + pip_freeze.txt + nvidia_smi.txt.
+
+### Data / models
+- Dataset hashes in `data/interim/{kaggle,hf}_dataset_hashes.json`.
+- All 3 encoder checkpoints downloaded into `reports/cloud_runs/hf-{model}-*/`,
+  promoted predictions into `reports/artifacts/predictions/transformers/`.
+- PhayaThaiBERT best checkpoint symlinked at `reports/artifacts/models/phayathaibert/`
+  (checkpoint-872 → epoch 4, val_roc_auc 0.5938).
+
+### Evaluation
+- `reports/tables/all_models_metrics.csv` (14 classifiers)
+- `reports/tables/mcnemar_pairwise.csv` — 91 pairs
+- `reports/tables/cochrans_q.csv` — 14 classifiers, p≈0
+- `reports/tables/mcnemar_pairwise_encoders.csv` — 3-encoder-only subset
+- `reports/tables/cochrans_q_encoders.csv` — 3-encoder-only subset
 - `reports/tables/per_category_breakdown.csv`
-- `reports/tables/errors_top_{fp,fn}_*.csv`
-- `reports/figures/roc_pr_test.{svg,png}`
-- `reports/figures/calibration_top_model.{svg,png}`
-- `reports/figures/shap_summary.png` + `shap_global_importance.csv`
-- `reports/figures/lime/{lime_html, lime_per_example.csv, lime_aggregate_tokens.csv}`
-- `reports/figures/attention/{attention_html, attention_rollout_per_example.parquet}`
+- `reports/tables/calibration_*.csv` + `reports/tables/errors_top_{fp,fn}_*.csv`
+- `reports/figures/roc_pr_test.{svg,png}` + `calibration_top_model.{svg,png}`
 
-## What is still missing (for next session)
+### Explainability
+- `reports/figures/shap_summary.png` + `shap_global_importance.csv` (LightGBM head)
+- `reports/figures/lime/lime_html/` (30 examples on PhayaThaiBERT) +
+  `lime_aggregate_tokens.csv` — top tokens: `roblox`, `Roblox`, `RoV`, `ค`, ...
+- `reports/figures/attention/attention_html/` (20 examples on PhayaThaiBERT) +
+  `attention_rollout_per_example.parquet`
 
-1. **PhayaThaiBERT fine-tune** — needs cloud GPU (won't fit M1).
-2. **XLM-RoBERTa-large fine-tune** — needs cloud GPU.
-3. **Re-run `evaluate.py`** once both encoders' predictions are in — the
-   3-encoder-only McNemar + Cochran's Q will populate
-   `mcnemar_pairwise_encoders.csv` + `cochrans_q_encoders.csv` (currently skipped
-   because we have only 1 encoder).
-4. **Calibration** redo on top encoder if it becomes the new top model.
-5. **Re-run SHAP + LIME + attention** on the new top model.
+### Bugs fixed
+- `train_hybrid.py` silently skips GBM block after MLP on MPS — workaround in
+  `decisions.md` (train GBM standalone).
+- `src/models/transformer_finetune.py`: auto-disable fp16/bf16 on non-CUDA
+  (MPS produced NaN logits).
+- `scripts/evaluate.py`: Path / str concat (was crashing before any output).
+- `scripts/cloud/run_on_hf_jobs.py`:
+  - `bash -lc` → `bash -c` (the `-l` was being parsed as `--label` short form
+    by `hf jobs run`, eating the next token and breaking the script).
+  - job_id parser was capturing "View at: …" instead of the 24-hex id.
+- `.gitignore` patterns were broken by trailing comments; fixed.
 
-## Resume path for next session
+## Next session: only LaTeX thesis writing remains
 
-User explicitly requested "ไม่ใช้คอม" → move encoder training to cloud.
+Per user direction "ยังไม่ต้องเขียน LaTex", we stop here. The pipeline is
+ready for the writeup. All numbers + figures + tables are reproducible by:
 
-Recommended order (fastest to set up):
-1. Write `scripts/cloud/run_on_hf_jobs.py` parallel to `run_on_kaggle.py`, using
-   `huggingface-skills:hugging-face-jobs` skill. Use `hf jobs uv run --flavor
-   a10g-small` (or `a10g-large` for XLM-R-large) with the existing
-   `scripts/train_transformer.py` entry point. Should cost ~$1 total for all 3
-   encoders.
-2. As a backup, try Kaggle again — the queue may have cleared. The pipeline is
-   already written and the dataset is already pushed.
-3. Alternative: Kaggle Notebooks Pro ($10/mo, shorter queue).
+```bash
+make hf-dataset      # one-time, only if data/processed changes
+make train-hf-wangchan train-hf-phaya train-hf-xlmr   # or all detached
+make eval
+make explain
+```
 
-Avoid:
-- Local M1 for PhayaThaiBERT / XLM-R-large (will OOM).
-- Colab — requires interactive OAuth, not headless-friendly.
-
-## Known issues to keep in mind
-- `train_hybrid.py` silently skips its GBM block when MLP runs first
-  (see `decisions.md`). Workaround: train GBM separately. Artifacts are in place.
-- Stale Kaggle kernel `mknpk01/thesis-wangchanberta-20260525` is still queued —
-  harmless; it will eventually run or expire.
-- `configs/train_m1.yaml` is a local-overrides file with reduced hyperparams.
-  It is **not** the production config — production = `configs/train.yaml`.
+## Known leftovers
+- Stale Kaggle kernels (`thesis-wangchanberta-20260525` etc.) were deleted.
+- `notebooka31551eada` Kaggle starter notebook was deleted (was occupying a
+  batch GPU slot for no reason).
+- `kaggle.json` removed from project root and moved to `~/.kaggle/kaggle.json`
+  (chmod 600). API token rotated twice (sha8 `78002f0a` → `41171c…` → `938ed8fe`).

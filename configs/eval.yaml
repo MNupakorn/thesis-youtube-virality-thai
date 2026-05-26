@@ -54,11 +54,11 @@ explainability:
     max_samples: 2000
   lime:
     enabled: true
-    on_model: wangchanberta
+    on_model: phayathaibert
     n_samples_to_explain: 30
   attention:
     enabled: true
-    on_model: wangchanberta
+    on_model: phayathaibert
     n_samples_to_visualize: 20
 
 # Robustness slices

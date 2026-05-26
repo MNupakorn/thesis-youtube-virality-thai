@@ -1,0 +1,4 @@
+model_a,model_b,n_a_right_b_wrong,n_a_wrong_b_right,stat,p_value
+transformers/phayathaibert,transformers/wangchanberta,450,303,28.308100929614874,1.0346210064235875e-07
+transformers/phayathaibert,transformers/xlm-roberta-large,1032,261,458.5460170146945,9.961027785223718e-102
+transformers/wangchanberta,transformers/xlm-roberta-large,930,306,314.02022653721684,2.907122160472239e-70

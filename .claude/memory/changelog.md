@@ -47,3 +47,11 @@ Pre-existing. See `git log`.
 - `ba9a1b5` feat(cloud): Kaggle Kernels orchestration for encoder fine-tuning
 - `18c28ec` docs(claude): add CLAUDE.md, .claude/ architecture, MEMORY.md, uv.lock
 - (uncommitted as of writing) auto-disable fp16/bf16 on non-CUDA in `transformer_finetune.py`; added `configs/train_m1.yaml` reduced config; ran WangchanBERTa locally on M1; encoder subset stats in `evaluate.py`.
+
+## 2026-05-26 (post-rotation) · HF Jobs path complete; all 3 encoders trained
+
+- `f416ab7` feat(cloud): HF Jobs parallel path (Kaggle free queue blocked)
+- `392d336` fix(cloud): default HF namespace to MGodK (was Kaggle's mknpk01)
+- `cfd2795` fix(cloud): parse hf jobs run output for actual 24-hex job_id
+- `94e01fb` fix(cloud): bash -c not -lc in HF jobs run (`-l` was eaten by `--label`)
+- (uncommitted) eval re-run with all 3 encoders. mcnemar_pairwise_encoders.csv + cochrans_q_encoders.csv populated. LIME + attention re-run on PhayaThaiBERT (new top encoder).
