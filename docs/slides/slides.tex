@@ -420,6 +420,7 @@
 \end{frame}
 
 \begin{frame}{4.3 การแบ่งข้อมูล: Channel-grouped + Time-aware}
+  \footnotesize
   \begin{block}{หลักการสำคัญ}
     \hl{ไม่มีช่องใดปรากฏทั้งใน train และ val/test} (channel-grouped) \\
     \hl{Test = วิดีโอที่ใหม่ที่สุด 15\%} ตาม \texttt{published\_at} (time-aware)
@@ -440,10 +441,8 @@
     \end{tabular}
   \end{center}
 
-  \vspace{0.4em}
-  \footnotesize
-  \textbf{ป้องกัน leakage 2 ระดับ:} (1) channel level — ไม่ให้แบบจำลองจำ ``ช่องนี้มักดัง''
-  (2) time level — ทดสอบบนข้อมูล \emph{อนาคต} ที่ไม่เห็นในการฝึก
+  \textbf{ป้องกัน leakage 2 ระดับ:} (1) channel level — ไม่ให้จำ ``ช่องนี้มักดัง''
+  (2) time level — ทดสอบบนข้อมูล \emph{อนาคต}
 \end{frame}
 
 \begin{frame}{4.4 หมวดและขนาดช่อง}
