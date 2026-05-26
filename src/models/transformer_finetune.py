@@ -12,6 +12,17 @@ import pandas as pd
 
 from src.utils import setup_logger
 
+
+def _has_cuda() -> bool:
+    """fp16/bf16 mixed precision in HuggingFace Trainer requires CUDA. MPS and CPU
+    silently produce NaN logits for some architectures, so we gate the flags."""
+    try:
+        import torch
+
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
+
 log = setup_logger("models.transformer_finetune")
 
 
@@ -107,8 +118,8 @@ def _build_trainer_full_ft(
         metric_for_best_model="eval_roc_auc",
         greater_is_better=True,
         logging_steps=50,
-        fp16=cfg.get("precision", "fp16") == "fp16",
-        bf16=cfg.get("precision") == "bf16",
+        fp16=cfg.get("precision", "fp16") == "fp16" and _has_cuda(),
+        bf16=cfg.get("precision") == "bf16" and _has_cuda(),
         gradient_checkpointing=cfg.get("gradient_checkpointing", False),
         seed=cfg.get("seed", 42),
         report_to=["none"],
@@ -235,8 +246,8 @@ def _build_trainer_qlora(
         metric_for_best_model="eval_roc_auc",
         greater_is_better=True,
         logging_steps=20,
-        bf16=cfg.get("precision", "bf16") == "bf16",
-        fp16=cfg.get("precision") == "fp16",
+        bf16=cfg.get("precision", "bf16") == "bf16" and _has_cuda(),
+        fp16=cfg.get("precision") == "fp16" and _has_cuda(),
         gradient_checkpointing=cfg.get("gradient_checkpointing", True),
         optim=cfg.get("optimizer", "paged_adamw_8bit"),
         seed=cfg.get("seed", 42),

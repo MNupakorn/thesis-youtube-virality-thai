@@ -136,6 +136,23 @@ def main() -> None:
             pd.DataFrame([cq]).to_csv(tables_dir / "cochrans_q.csv", index=False)
             log.info(f"cochran's Q: {cq}")
 
+        # ---- Encoder-only subset (the thesis headline comparison) ----------
+        encoder_aliases = ("wangchanberta", "phayathaibert", "xlm-roberta-large")
+        encoder_keys = [k for k in proba_dict if Path(k).name in encoder_aliases]
+        if len(encoder_keys) >= 2:
+            enc_proba = {k: proba_dict[k] for k in encoder_keys}
+            mc_enc = mcnemar_pairwise(y_true, enc_proba)
+            mc_enc.to_csv(tables_dir / "mcnemar_pairwise_encoders.csv", index=False)
+            log.info(f"3-encoder mcnemar:\n{mc_enc.to_string(index=False)}")
+            if len(encoder_keys) >= 3:
+                cq_enc = cochrans_q_test(y_true, enc_proba)
+                pd.DataFrame([cq_enc]).to_csv(tables_dir / "cochrans_q_encoders.csv", index=False)
+                log.info(f"3-encoder Cochran's Q: {cq_enc}")
+        else:
+            log.warning(
+                f"encoder subset has only {len(encoder_keys)} model(s); skip encoder-only stats"
+            )
+
     # ---- Calibration on top model -----------------------------------------
     if eval_cfg["calibration"]["enabled"] and not metrics_df.empty:
         top_model = metrics_df.iloc[0]["model"]

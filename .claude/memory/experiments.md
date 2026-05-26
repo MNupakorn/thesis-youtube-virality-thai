@@ -49,3 +49,23 @@ Append-only. One entry per training or evaluation run. MLflow is the source of t
 ### Pending: wangchanberta · title · focal — Kaggle T4
 ### Pending: phayathaibert · title · focal — Kaggle T4
 ### Pending: xlm-roberta-large · title · focal — Kaggle T4 (grad ckpt + batch 8 + accum 4)
+
+### 2026-05-26 · wangchanberta · title · focal · M1 MPS local fallback (3 epoch)
+
+- **Why local:** Kaggle free GPU pool was congested >6 h, kernel `mknpk01/thesis-wangchanberta-20260525` never left QUEUED state past the 6 h driver cap. Fell back to local M1 fine-tune.
+- **Config:** `configs/train_m1.yaml` (epochs=3, batch_size=16, grad_accum=2, max_length=48, gradient_checkpointing=true, fp32 — fp16 produced NaN logits on MPS).
+- **Best checkpoint:** `reports/artifacts/models/wangchanberta/checkpoint-218` (epoch 1, val ROC-AUC 0.5491).
+- **Test metrics:** ROC-AUC 0.5748 [0.5416, 0.6044], f1_pos 0.1754, threshold 0.461. **Below the LightGBM baseline (0.673).**
+- **Caveat:** Reduced training (3 epoch / max_len 48) is sub-optimal. Real comparison needs the full Kaggle config (5 epoch / max_len 64, fp16). Treat this as a pipeline smoke test, not the final number.
+- **Predictions:** `reports/artifacts/predictions/transformers/wangchanberta.parquet`.
+- **Explainability:** SHAP (LightGBM head) + LIME (30 titles) + attention rollout (20 titles) all generated.
+
+### Pending: phayathaibert (278M) · cloud-only
+
+- **M1 status:** OOM on backward at 9 GB MPS pool with batch=8 + grad_accum=4 + max_len=48 + grad_ckpt. Local route closed.
+- **Recommended infra:** HF Jobs `--flavor a10g-small`.
+
+### Pending: xlm-roberta-large (560M) · cloud-only
+
+- **M1 status:** Not attempted; would OOM (>10 GB needed for fp32).
+- **Recommended infra:** HF Jobs `--flavor a10g-large` or A100.

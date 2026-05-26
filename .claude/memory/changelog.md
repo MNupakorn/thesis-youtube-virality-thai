@@ -39,3 +39,11 @@ Pre-existing. See `git log`.
 - one line per concrete change
 - another line
 ```
+
+## 2026-05-26 · cloud-pipeline + eval/explain extensions + WangchanBERTa local fallback
+
+- `9fa5d70` feat(explain): add LIME + attention rollout runners; fix evaluate Path concat
+- `60fad4a` feat(eval): ROC/PR + reliability figures + top-50 FP/FN error analysis
+- `ba9a1b5` feat(cloud): Kaggle Kernels orchestration for encoder fine-tuning
+- `18c28ec` docs(claude): add CLAUDE.md, .claude/ architecture, MEMORY.md, uv.lock
+- (uncommitted as of writing) auto-disable fp16/bf16 on non-CUDA in `transformer_finetune.py`; added `configs/train_m1.yaml` reduced config; ran WangchanBERTa locally on M1; encoder subset stats in `evaluate.py`.

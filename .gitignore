@@ -61,3 +61,7 @@ reports/*.pdf
 # Misc
 *.log
 tmp/
+
+# Kaggle API credentials (must never commit)
+kaggle.json
+.kaggle/
