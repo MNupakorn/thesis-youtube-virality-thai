@@ -1,0 +1,120 @@
+global:
+  seed: 42
+  mlflow_tracking_uri: file:./mlruns
+  experiment_name: thesis-virality-thai
+  artifacts_dir: reports/artifacts
+baselines:
+  models:
+  - name: logistic_regression
+    params:
+      C: 1.0
+      max_iter: 1000
+      class_weight: balanced
+      random_state: 42
+  - name: lightgbm
+    params:
+      n_estimators: 500
+      learning_rate: 0.05
+      num_leaves: 63
+      max_depth: -1
+      class_weight: balanced
+      random_state: 42
+  - name: xgboost
+    params:
+      n_estimators: 500
+      learning_rate: 0.05
+      max_depth: 7
+      scale_pos_weight: auto
+      random_state: 42
+      tree_method: hist
+  feature_sets:
+  - structured
+  - tfidf
+  - structured_plus_tfidf
+  - structured_plus_sentiment
+  - all
+transformers:
+  wangchanberta:
+    pretrained_name: airesearch/wangchanberta-base-att-spm-uncased
+    num_labels: 2
+    max_length: 64
+    batch_size: 32
+    grad_accumulation: 1
+    epochs: 5
+    learning_rate: 2.0e-05
+    weight_decay: 0.01
+    warmup_ratio: 0.06
+    label_smoothing: 0.0
+    optimizer: adamw_torch
+    precision: fp16
+    gradient_checkpointing: false
+    eval_strategy: epoch
+    save_total_limit: 2
+    early_stopping_patience: 2
+    loss: focal
+    focal_gamma: 2.0
+    seed: 42
+  phayathaibert:
+    pretrained_name: clicknext/phayathaibert
+    num_labels: 2
+    max_length: 96
+    batch_size: 16
+    grad_accumulation: 2
+    epochs: 4
+    learning_rate: 2.0e-05
+    weight_decay: 0.01
+    warmup_ratio: 0.1
+    optimizer: adamw_torch
+    precision: fp16
+    gradient_checkpointing: true
+    eval_strategy: epoch
+    save_total_limit: 2
+    early_stopping_patience: 2
+    loss: focal
+    focal_gamma: 2.0
+    seed: 42
+  xlm-roberta-large:
+    pretrained_name: FacebookAI/xlm-roberta-large
+    num_labels: 2
+    max_length: 96
+    batch_size: 8
+    grad_accumulation: 4
+    epochs: 4
+    learning_rate: 1.0e-05
+    weight_decay: 0.01
+    warmup_ratio: 0.1
+    optimizer: adamw_torch
+    precision: fp16
+    gradient_checkpointing: true
+    eval_strategy: epoch
+    save_total_limit: 2
+    early_stopping_patience: 2
+    loss: focal
+    focal_gamma: 2.0
+    seed: 42
+hybrid:
+  text_backbone: airesearch/wangchanberta-base-att-spm-uncased
+  freeze_backbone: true
+  pooling: cls
+  fusion:
+    type: concat
+    dropout: 0.3
+    hidden_dim: 256
+    num_layers: 2
+    activation: gelu
+  optimizer: adamw_torch
+  learning_rate: 0.001
+  weight_decay: 0.01
+  batch_size: 128
+  epochs: 30
+  loss: focal
+  focal_gamma: 2.0
+  early_stopping_patience: 5
+  seed: 42
+  also_train_gbm_head: true
+hpo:
+  enabled: false
+  framework: optuna
+  n_trials: 30
+  direction: maximize
+  metric: roc_auc
