@@ -182,6 +182,17 @@ def main() -> None:
         default=None,
         help="local staging dir (default: tmp/kaggle_kernels/{slug-name})",
     )
+    ap.add_argument(
+        "--push-only",
+        action="store_true",
+        help="render + push the kernel and exit. Use to queue multiple models in "
+        "parallel; later run with --poll-only (or the bare driver) to wait + collect.",
+    )
+    ap.add_argument(
+        "--poll-only",
+        action="store_true",
+        help="skip push; assume the kernel is already submitted. Polls + downloads.",
+    )
     args = ap.parse_args()
 
     root = project_root()
@@ -192,9 +203,13 @@ def main() -> None:
     slug = f"{KAGGLE_USER}/{slug_name}"
 
     staging = Path(args.staging) if args.staging else (root / "tmp" / "kaggle_kernels" / slug_name)
-    write_kernel_files(staging, args.model, sha, slug)
 
-    push_kernel(staging)
+    if not args.poll_only:
+        write_kernel_files(staging, args.model, sha, slug)
+        push_kernel(staging)
+        if args.push_only:
+            log.info(f"pushed {slug}; skipping poll (--push-only). Run --poll-only later.")
+            return
 
     state = poll_status(slug)
     cloud_run_dir = ensure_dir(root / "reports" / "cloud_runs" / slug_name)
