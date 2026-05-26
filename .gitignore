@@ -71,3 +71,5 @@ tmp/
 # Kaggle API credentials (must never commit)
 kaggle.json
 .kaggle/
+docs/thesis.zip
+/2Main Logo KMITL_Eng Orange.png

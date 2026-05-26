@@ -15,21 +15,21 @@
 \setotherlanguage{english}
 \usepackage{fontspec}
 \defaultfontfeatures{Ligatures=TeX,Renderer=HarfBuzz}
-\setmainfont[Path=../fonts/,
+\setmainfont[Path=fonts/,
   Extension=.ttf,
   UprightFont=THSarabunNew,
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
   Scale=1.2]{THSarabunNew}
-\setsansfont[Path=../fonts/,
+\setsansfont[Path=fonts/,
   Extension=.ttf,
   UprightFont=THSarabunNew,
   BoldFont=THSarabunNew-Bold,
   ItalicFont=THSarabunNew-Italic,
   BoldItalicFont=THSarabunNew-BoldItalic,
   Scale=1.2]{THSarabunNew}
-\newfontfamily\thaifont[Path=../fonts/,Extension=.ttf,
+\newfontfamily\thaifont[Path=fonts/,Extension=.ttf,
   UprightFont=THSarabunNew,BoldFont=THSarabunNew-Bold,Scale=1.2]{THSarabunNew}
 
 % ── Packages ──────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@
 % ─── 01 Title ────────────────────────────────────────────────────────
 \begin{frame}[plain]
   \begin{center}
-    \includegraphics[width=2.2cm]{../figures/kmitl_logo.png}\\[0.6em]
+    \includegraphics[width=2.2cm]{figures/kmitl_logo.png}\\[0.6em]
   \end{center}
   \titlepage
 \end{frame}
@@ -800,7 +800,7 @@
 
 \begin{frame}{7.3 ROC + PR Curves (Test Set)}
   \begin{center}
-    \includegraphics[width=0.95\textwidth]{../figures/roc_pr_test.png}
+    \includegraphics[width=0.95\textwidth]{figures/roc_pr_test.png}
   \end{center}
   \begin{itemize}
     \item Stacking \hl{ครองพื้นที่บนสุด} ของ ROC space ตลอด
@@ -860,7 +860,7 @@
 \begin{frame}{7.6 Calibration Results}
   \begin{columns}[T]
     \column{0.55\textwidth}
-    \includegraphics[width=\textwidth]{../figures/calibration_top_model.png}
+    \includegraphics[width=\textwidth]{figures/calibration_top_model.png}
     \column{0.45\textwidth}
     \footnotesize
     \begin{tabular}{lr}
@@ -887,7 +887,7 @@
 
 \begin{frame}{7.7 Reliability Diagram (Stacking)}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{../figures/reliability_stacking.png}
+    \includegraphics[width=0.8\textwidth]{figures/reliability_stacking.png}
   \end{center}
   \begin{itemize}
     \item Predicted prob ใกล้กับ observed frequency มาก (ค่า ECE $=$ 0.016)
@@ -924,7 +924,7 @@
 
 \begin{frame}{8.2 Robustness Slices}
   \begin{center}
-    \includegraphics[width=0.85\textwidth]{../figures/robustness_slices.png}
+    \includegraphics[width=0.85\textwidth]{figures/robustness_slices.png}
   \end{center}
   \begin{itemize}
     \item \textbf{หมวด:} Entertainment AUC $=$ 0.71, Music $=$ 0.68, Gaming $=$ 0.67
@@ -936,7 +936,7 @@
 \begin{frame}{8.3 Per-channel AUC Distribution}
   \begin{columns}[T]
     \column{0.55\textwidth}
-    \includegraphics[width=\textwidth]{../figures/per_channel_auc_cdf.png}
+    \includegraphics[width=\textwidth]{figures/per_channel_auc_cdf.png}
     \column{0.45\textwidth}
     \footnotesize
     \textbf{48 ช่องที่มีตัวอย่าง $\geq$10 ในชุดทดสอบ}
@@ -988,7 +988,7 @@
 
 \begin{frame}{9.1 SHAP Global Importance}
   \begin{center}
-    \includegraphics[width=0.75\textwidth]{../figures/shap_summary.png}
+    \includegraphics[width=0.75\textwidth]{figures/shap_summary.png}
   \end{center}
   \begin{itemize}
     \item \hl{\texttt{channel\_subscribers}} อันดับ 1 — ยืนยัน Hoiles 2017
