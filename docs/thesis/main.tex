@@ -91,14 +91,22 @@
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
 
-% ── Bibliography: KMITL STAT_2025 style (Name, Year) in-text + custom list ─────
-\usepackage[backend=biber,style=kmitl-stat,sorting=nyt,language=english,
+% ── Bibliography: built-in authoryear (ใช้ได้แน่นอน ไม่มี custom file)
+% หลัง compile แล้วจะออกรูปแบบ (Author, Year) ในเนื้อความ
+% และรายการ "Author. (Year). Title. Journal..." ที่ท้ายเล่ม
+\usepackage[backend=biber,style=authoryear,sorting=nyt,language=english,
             natbib=true,maxcitenames=2,maxbibnames=99,giveninits=true,
             uniquename=init]{biblatex}
 \addbibresource{references.bib}
-% In-text: (Name, Year) / (Name and Name, Year) / (Name et al., Year)
+% In-text: (Name, Year) — เปลี่ยน ; เป็น , คั่นชื่อกับปี
 \renewcommand*{\nameyeardelim}{\addcomma\space}
 \renewcommand*{\finalandcomma}{}
+% ── ปรับรูปแบบรายการอ้างอิง ให้ใกล้เคียงคู่มือ STAT_2025 ──
+% (ลบวงเล็บรอบปี + ลบ "pp." + ใช้ ":" คั่น volume:pages)
+\AtBeginDocument{%
+  \DeclareFieldFormat{pages}{#1}%
+  \DeclareFieldFormat[article]{number}{}%
+}
 
 % ── Headings: TH SarabunPSK 24/20/18/16 ตาม STAT template ─────
 \usepackage{titlesec}
