@@ -1,51 +1,74 @@
-% frontmatter/cover.tex — หน้าปกปัญหาพิเศษ KMITL (STAT_2025 template)
+% frontmatter/cover.tex — หน้าปกตามคู่มือ STAT_2025
+% หน้า 1: ปกภาษาไทย (มีชื่อหัวข้อทั้งไทยและอังกฤษ)
+% หน้า 2: ปกภาษาอังกฤษ
+
+% ── หน้าปกภาษาไทย ───────────────────────────────────────────
 \thispagestyle{empty}
 \begin{center}
-  \vspace*{0.3cm}
+  \vspace*{0.5in}
 
-  \includegraphics[width=3.0cm]{figures/kmitl_logo.png}\\[0.6cm]
+  % ชื่อหัวข้อภาษาไทย — TH SarabunPSK 24 หนา กลางหน้า
+  {\fontsize{24pt}{32pt}\selectfont\bfseries\thesistitleTH\par}
 
-  % ── ชื่อหัวข้อภาษาไทย (TH SarabunPSK 24 หนา กลางหน้า) ──
-  \begin{minipage}{0.92\textwidth}
-    \begin{center}
-      {\fontsize{24pt}{30pt}\selectfont\bfseries\thesistitleTH\par}
-    \end{center}
-  \end{minipage}
+  \vspace{0.4cm}
 
-  \vspace{1.0cm}
-
-  % ── ชื่อหัวข้อภาษาอังกฤษ (TH SarabunPSK 24 Bold Uppercase) ──
-  \begin{minipage}{0.92\textwidth}
-    \begin{center}
-      {\fontsize{24pt}{30pt}\selectfont\bfseries\thesistitleEN\par}
-    \end{center}
-  \end{minipage}
+  % ชื่อหัวข้อภาษาอังกฤษ — TH SarabunPSK 24 Bold Uppercase
+  {\fontsize{24pt}{32pt}\selectfont\bfseries\MakeUppercase{\thesistitleEN}\par}
 
   \vfill
 
-  % ── ชื่อนักศึกษา (TH SarabunPSK 20 หนา กลางหน้า) ──
-  {\fontsize{20pt}{26pt}\selectfont\bfseries
-    \authorone\quad รหัสนักศึกษา\ \studentidone\\[2pt]
-    \authortwo\quad รหัสนักศึกษา\ \studentidtwo\\[2pt]
-    \authorthree\quad รหัสนักศึกษา\ \studentidthree\par
-  }
-
-  \vspace{0.6cm}
-  {\fontsize{20pt}{26pt}\selectfont
-    อาจารย์ที่ปรึกษา\ \advisor
+  % ชื่อนักศึกษา — TH SarabunPSK 20 หนา (เว้น 3 วรรคระหว่างชื่อกับนามสกุล)
+  {\fontsize{20pt}{30pt}\selectfont\bfseries
+    นายตรัยภูรินท์\hspace{1.5em}สืบสุวรรณสาร\\[2pt]
+    นายธีรนนท์\hspace{1.5em}ไชยลังกา\\[2pt]
+    นายภาณุเดช\hspace{1.5em}ภู่โทสนธิ์\par
   }
 
   \vfill
 
-  % ── ส่วนล่าง (TH SarabunPSK 20 หนา) ──
-  {\fontsize{20pt}{26pt}\selectfont\bfseries
-    ปัญหาพิเศษนี้เป็นส่วนหนึ่งของการศึกษาตามหลักสูตร\\[2pt]
-    ปริญญาวิทยาศาสตรบัณฑิต (สถิติประยุกต์และการวิเคราะห์ข้อมูล)\\[2pt]
-    \department\ \school\\[2pt]
-    \university\\[2pt]
+  % ส่วนล่าง — TH SarabunPSK 20 หนา
+  {\fontsize{20pt}{30pt}\selectfont\bfseries
+    ปัญหาพิเศษนี้เป็นส่วนหนึ่งของการศึกษาตามหลักสูตร\\
+    ปริญญาวิทยาศาสตรบัณฑิต (สถิติประยุกต์และการวิเคราะห์ข้อมูล)\\
+    ภาควิชาสถิติ\ คณะวิทยาศาสตร์\\
+    สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง\\
     ปีการศึกษา\ \academicyear\par
   }
 
-  \vspace{0.6cm}
+  \vspace*{0.5in}
+\end{center}
+\newpage
+
+% ── หน้าปกภาษาอังกฤษ ────────────────────────────────────────
+\thispagestyle{empty}
+\begin{center}
+  \vspace*{0.5in}
+
+  % English title — TH SarabunPSK 24 Bold Uppercase
+  {\fontsize{24pt}{32pt}\selectfont\bfseries\MakeUppercase{\thesistitleEN}\par}
+
+  \vfill
+
+  % Student names — uppercase, 20 Bold (3 spaces between name and surname)
+  {\fontsize{20pt}{30pt}\selectfont\bfseries
+    \MakeUppercase{Mr.\ Traipoohrin}\hspace{1.5em}\MakeUppercase{Suebuswansarn}\\[2pt]
+    \MakeUppercase{Mr.\ Teeranon}\hspace{1.5em}\MakeUppercase{Chailangka}\\[2pt]
+    \MakeUppercase{Mr.\ Phanudech}\hspace{1.5em}\MakeUppercase{Phuthoson}\par
+  }
+
+  \vfill
+
+  % Footer — TH SarabunPSK 20 Bold Uppercase
+  {\fontsize{20pt}{30pt}\selectfont\bfseries
+    A SPECIAL PROBLEM SUBMITTED IN PARTIAL\\
+    FULFILLMENT OF THE REQUIREMENTS FOR\\
+    THE DEGREE OF BACHELOR OF SCIENCE\\
+    (APPLIED STATISTICS AND DATA ANALYTICS)\\
+    DEPARTMENT OF STATISTICS, SCHOOL OF SCIENCE\\
+    KING MONGKUT'S INSTITUTE OF TECHNOLOGY LADKRABANG\\
+    ACADEMIC YEAR\ \academicyearEN\par
+  }
+
+  \vspace*{0.5in}
 \end{center}
 \newpage
