@@ -33,9 +33,13 @@
 }{%
   \newfontfamily\thaifonttt{Norasi}%
 }
-% Math + ตัวเลข/สัญลักษณ์: Times New Roman 12 pt (ตามคู่มือ STAT)
+% Math + ตัวเลข/สัญลักษณ์: ใช้ TeX Gyre Termes (Times-compatible) สำหรับ math
+% ผ่าน mathastext เพื่อไม่ให้ override การตั้งค่าฟอนต์ภาษาไทย
 \newfontfamily\timesfont{TeX Gyre Termes}
-\AtBeginDocument{\everymath{\fontfamily{ptm}\fontsize{12pt}{14pt}\selectfont}}
+\usepackage[italic,defaultmathsizes]{mathastext}
+\AtBeginDocument{%
+  \begingroup\timesfont\Mathastext\endgroup
+}
 
 % ── ขนาดอักษรตาม TH SarabunPSK 16/18/20/24 ────────────────
 % เนื้อหาทั่วไป 16pt; sections 18pt หนา; "บทที่ X" 20pt หนา; ชื่อบท 24pt หนา
