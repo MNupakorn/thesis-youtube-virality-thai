@@ -14,28 +14,17 @@
 
 % TH Sarabun (PSK preferred → New fallback). ใช้สเกล 1.0 และคุมขนาด
 % ผ่าน \fontsize เพื่อให้ตรงตาม template (24/20/18/16 pt)
-\IfFontExistsTF{[./fonts/THSarabunPSK.ttf]}{%
+\IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
   \setmainfont[
     Path=./fonts/,
-    UprightFont=THSarabunPSK.ttf,
-    BoldFont=THSarabunPSK-Bold.ttf,
-    ItalicFont=THSarabunPSK-Italic.ttf,
-    BoldItalicFont=THSarabunPSK-BoldItalic.ttf,
+    UprightFont=THSarabunNew.ttf,
+    BoldFont=THSarabunNew-Bold.ttf,
+    ItalicFont=THSarabunNew-Italic.ttf,
+    BoldItalicFont=THSarabunNew-BoldItalic.ttf,
     Ligatures=TeX
-  ]{THSarabunPSK}%
+  ]{THSarabunNew}%
 }{%
-  \IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
-    \setmainfont[
-      Path=./fonts/,
-      UprightFont=THSarabunNew.ttf,
-      BoldFont=THSarabunNew-Bold.ttf,
-      ItalicFont=THSarabunNew-Italic.ttf,
-      BoldItalicFont=THSarabunNew-BoldItalic.ttf,
-      Ligatures=TeX
-    ]{THSarabunNew}%
-  }{%
-    \setmainfont[Ligatures=TeX]{Norasi}%
-  }%
+  \setmainfont[Ligatures=TeX]{Norasi}%
 }
 % Mono — ใช้ TH Sarabun เพื่อรองรับ Thai script (polyglossia ต้องการ \thaifonttt)
 \IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
