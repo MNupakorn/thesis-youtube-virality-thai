@@ -91,13 +91,14 @@
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
 
-% ── Bibliography: เปลี่ยนเป็น author-year รูปแบบ (Name, 2024) ─────
-\usepackage[backend=biber,style=authoryear,sorting=nyt,language=english,
+% ── Bibliography: KMITL STAT_2025 style (Name, Year) in-text + custom list ─────
+\usepackage[backend=biber,style=kmitl-stat,sorting=nyt,language=english,
             natbib=true,maxcitenames=2,maxbibnames=99,giveninits=true,
             uniquename=init]{biblatex}
 \addbibresource{references.bib}
-% เปลี่ยน parens เป็น (Author, Year)
+% In-text: (Name, Year) / (Name and Name, Year) / (Name et al., Year)
 \renewcommand*{\nameyeardelim}{\addcomma\space}
+\renewcommand*{\finalandcomma}{}
 
 % ── Headings: TH SarabunPSK 24/20/18/16 ตาม STAT template ─────
 \usepackage{titlesec}
