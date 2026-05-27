@@ -33,25 +33,22 @@ Thailand 2025 ระบุว่าผู้ใช้อินเทอร์เ
 การใช้แบบจำลองภาษา (Language Models, LMs) ที่ผ่านการฝึกล่วงหน้าด้วยข้อมูล
 ภาษาไทยขนาดใหญ่จึงเป็นทางเลือกที่น่าสนใจ
 
-\emph{แบบจำลองทรานส์ฟอร์เมอร์} (Transformer) ที่นำเสนอโดย Vaswani et~al.\
-\cite{vaswani2017attention} ได้กลายเป็นแกนสำคัญของระบบ NLP สมัยใหม่ เนื่องจาก
+\emph{แบบจำลองทรานส์ฟอร์เมอร์} (Transformer) ที่นำเสนอโดย \textcite{vaswani2017attention} ได้กลายเป็นแกนสำคัญของระบบ NLP สมัยใหม่ เนื่องจาก
 สถาปัตยกรรม self-attention แก้ปัญหา \emph{การเลือนหายของเกรเดียนต์} (vanishing
 gradient) ที่ RNN/LSTM ประสบเมื่อต้องจดจำบริบทระยะยาว และสามารถจับการพึ่งพา
-ระยะไกลในข้อความ (long-range dependencies) ได้อย่างมีประสิทธิภาพ Devlin et~al.\
-\cite{devlin2019bert} เสนอ BERT ซึ่งเป็นแบบจำลองแบบเข้ารหัส (encoder) สองทิศทาง
-ที่ฝึกล่วงหน้าด้วยภาระงาน Masked Language Modelling (MLM) และต่อมา Liu et~al.\
-\cite{liu2019roberta} ได้พัฒนา RoBERTa ซึ่งปรับขั้นตอนการฝึกล่วงหน้าให้แข็งแกร่ง
+ระยะไกลในข้อความ (long-range dependencies) ได้อย่างมีประสิทธิภาพ \textcite{devlin2019bert} เสนอ BERT ซึ่งเป็นแบบจำลองแบบเข้ารหัส (encoder) สองทิศทาง
+ที่ฝึกล่วงหน้าด้วยภาระงาน Masked Language Modelling (MLM) และต่อมา \textcite{liu2019roberta} ได้พัฒนา RoBERTa ซึ่งปรับขั้นตอนการฝึกล่วงหน้าให้แข็งแกร่ง
 ขึ้น แบบจำลองในตระกูล BERT/RoBERTa สำหรับภาษาไทยที่ได้รับความนิยมในปัจจุบัน
 ได้แก่ \textbf{WangchanBERTa} โดย AIResearch.in.th \cite{lowphansirikul2021wangchanberta}
-และ \textbf{PhayaThaiBERT} โดยทีม CLICKNEXT \cite{phayathaibert2023} ส่วน
+และ \textbf{PhayaThaiBERT} โดยทีม \textcite{phayathaibert2023} ส่วน
 แบบจำลองมัลติลิงกัวลที่รองรับภาษาไทยและสามารถจัดการกับการสลับภาษาในเอกสารเดียว
 กันได้ดี คือ \textbf{XLM-RoBERTa} \cite{conneau2020xlmr}
 
 อย่างไรก็ตาม \emph{ยังไม่มีงานวิจัยใดในประเทศไทย} ที่เปรียบเทียบความสามารถใน
 การพยากรณ์ความไวรัลของวิดีโอ YouTube ระหว่างแบบจำลองทรานส์ฟอร์เมอร์ภาษาไทย
 หลายตัวบนชุดข้อมูลเดียวกัน พร้อมการประเมินผลทางสถิติที่เข้มงวด งานก่อนหน้า
-ในต่างประเทศ เช่น Trzcinski \& Rokita \cite{trzcinski2017popularity} และ
-Khosla et~al.\ \cite{khosla2014popularity} ใช้คุณลักษณะภาพเป็นหลัก ในขณะที่
+ในต่างประเทศ เช่น \textcite{trzcinski2017popularity} และ
+\textcite{khosla2014popularity} ใช้คุณลักษณะภาพเป็นหลัก ในขณะที่
 ไม่ครอบคลุมลักษณะเฉพาะของข้อความภาษาไทย ดังนั้นการศึกษานี้จึงเข้าไปอุดช่องว่าง
 ดังกล่าวด้วยการเปรียบเทียบที่ครอบคลุมและมีระเบียบวิธีวิจัยที่สามารถทำซ้ำได้
 
@@ -108,8 +105,7 @@ WangchanBERTa, PhayaThaiBERT และ XLM-RoBERTa-large
 
 หมายเหตุ: แบบจำลองแบบ \emph{ถอดรหัส} (decoder-only) เช่น Typhoon 2.5 และ
 OpenThaiGPT ซึ่งเคยอยู่ในแผนเริ่มต้น ถูกตัดออกจากการเปรียบเทียบหลักด้วยเหตุผล
-3 ประการคือ (1) ผลการศึกษาเชิงทฤษฎีและเชิงประจักษ์โดย Touvron et~al.\
-\cite{touvron2023llama} และ Wei et~al.\ \cite{wei2022emergent} แสดงว่า decoder
+3 ประการคือ (1) ผลการศึกษาเชิงทฤษฎีและเชิงประจักษ์โดย \textcite{touvron2023llama} และ \textcite{wei2022emergent} แสดงว่า decoder
 LLM เหมาะกับงาน generation มากกว่างาน classification ขนาดเล็ก (2) ทรัพยากร
 คอมพิวเตอร์ที่จำกัดทำให้การปรับจูนเต็มรูปแบบเป็นไปไม่ได้ ต้องใช้ QLoRA ซึ่ง
 เป็นการเปรียบเทียบที่ไม่ยุติธรรมเชิงสถาปัตยกรรม และ (3) ข้อสังเกตเชิงประจักษ์
