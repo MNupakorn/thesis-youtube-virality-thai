@@ -26,16 +26,41 @@
 }{%
   \setmainfont[Ligatures=TeX]{Norasi}%
 }
-% Mono — ใช้ TH Sarabun เพื่อรองรับ Thai script (polyglossia ต้องการ \thaifonttt)
+% Mono — Inconsolata สำหรับ code (เป็น monospace จริง)
+% \thaifonttt ยังคงเป็น TH Sarabun เพื่อให้ polyglossia แสดงไทยใน mono context
+\setmonofont[
+  Extension=.otf,
+  UprightFont=Inconsolatazi4-Regular,
+  BoldFont=Inconsolatazi4-Bold,
+  Scale=0.95
+]{Inconsolatazi4}
+\newfontfamily\codefont[
+  Extension=.otf,
+  UprightFont=Inconsolatazi4-Regular,
+  BoldFont=Inconsolatazi4-Bold,
+  Scale=0.92
+]{Inconsolatazi4}
 \IfFontExistsTF{[./fonts/THSarabunNew.ttf]}{%
-  \setmonofont[Path=./fonts/, UprightFont=THSarabunNew.ttf, BoldFont=THSarabunNew-Bold.ttf]{THSarabunNew}%
-  \newfontfamily\thaifonttt[Path=./fonts/, UprightFont=THSarabunNew.ttf, BoldFont=THSarabunNew-Bold.ttf]{THSarabunNew}%
+  \newfontfamily\thaifonttt[
+    Path=./fonts/,
+    UprightFont=THSarabunNew.ttf,
+    BoldFont=THSarabunNew-Bold.ttf,
+    ItalicFont=THSarabunNew-Italic.ttf,
+    BoldItalicFont=THSarabunNew-BoldItalic.ttf
+  ]{THSarabunNew}%
 }{%
   \newfontfamily\thaifonttt{Norasi}%
 }
 % Math + ตัวเลข/สัญลักษณ์: ใช้ TeX Gyre Termes (Times-compatible) สำหรับ math
 % ผ่าน mathastext เพื่อไม่ให้ override การตั้งค่าฟอนต์ภาษาไทย
-\newfontfamily\timesfont{TeX Gyre Termes}
+% ใช้ Extension=.otf เพื่อให้ fontspec หาไฟล์เจอแน่ ๆ
+\newfontfamily\timesfont[
+  Extension      = .otf,
+  UprightFont    = *-regular,
+  BoldFont       = *-bold,
+  ItalicFont     = *-italic,
+  BoldItalicFont = *-bolditalic
+]{texgyretermes}
 \usepackage[italic,defaultmathsizes]{mathastext}
 \AtBeginDocument{%
   \begingroup\timesfont\Mathastext\endgroup
@@ -204,13 +229,15 @@
 \definecolor{codestr}{rgb}{0.7,0.2,0.2}
 \lstset{
   backgroundcolor=\color{codebg},
-  basicstyle=\ttfamily\footnotesize,
+  basicstyle=\codefont\scriptsize,
   keywordstyle=\color{codekey}\bfseries,
   commentstyle=\color{codecom}\itshape,
   stringstyle=\color{codestr},
   numbers=left, numberstyle=\tiny, frame=single,
   breaklines=true, captionpos=b, tabsize=2,
   showstringspaces=false,
+  columns=fixed,
+  basewidth=0.5em,
   inputencoding=utf8, extendedchars=true
 }
 \lstdefinelanguage{yaml}{

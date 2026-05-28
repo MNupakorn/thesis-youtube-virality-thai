@@ -90,7 +90,7 @@ CI 95\% แบบ horizontal error bar
 
 \begin{table}[H]
 \centering
-\caption{สรุปการกระจายของ ROC-AUC รายช่องสำหรับ \texttt{stacking\_lr\_calibrated}
+\caption[สรุปการกระจายของ ROC-AUC รายช่องสำหรับ stacking ensemble]{สรุปการกระจายของ ROC-AUC รายช่องสำหรับ \texttt{stacking\_lr\_calibrated}
 ($n=48$ ช่องที่เข้าเงื่อนไข)}
 \label{tab:per-channel-summary}
 \begin{tabularx}{\textwidth}{Xrr}
@@ -269,16 +269,16 @@ XLM-RoBERTa-large   & 560M & 0.5450          & [0.511, 0.578] & 0.166 \\
 เชิงตำแหน่งเท่านั้น)}
 \label{tab:prior-works}
 \small
-\begin{tabularx}{\textwidth}{p{4cm}p{3cm}Xr}
+\begin{tabularx}{\textwidth}{p{3.2cm}p{2.6cm}p{2.6cm}X}
 \toprule
-\textbf{Work} & \textbf{Platform / lang} & \textbf{Pre-publish?} & \textbf{Headline} \\
+\textbf{Work} & \textbf{Platform/lang} & \textbf{Pre-publish?} & \textbf{Headline} \\
 \midrule
 \textcite{pinto2013using}        & YouTube / EN  & ไม่ (ใช้ early views) & MRSE = 0.30 \\
 \textcite{khosla2014popularity} & Flickr / EN   & ใช่ (ภาพ) & Spearman $\rho$ = 0.81 \\
 \textcite{trzcinski2017popularity} & Facebook / EN & ใช่+early & $R^2$ = 0.65 (24h) \\
 \textcite{hoiles2017engagement} & YouTube / EN  & ใช่ (meta) & RF reg. $R^2 \approx 0.5$ \\
 \midrule
-\textbf{This work}                          & YouTube / TH  & \textbf{ใช่} (text+meta only) & \textbf{ROC-AUC = 0.6914 [0.6625, 0.7174]} \\
+\textbf{This work} & YouTube / TH & \textbf{ใช่} (text+meta) & \textbf{AUC = 0.6914 [0.66, 0.72]} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -893,10 +893,10 @@ discriminative
 \toprule
 \textbf{สมมติฐาน} & \textbf{เนื้อหา} & \textbf{สรุป} \\
 \midrule
-$H_1$ & PhayaThaiBERT $>$ WangchanBERTa & \textbf{ยืนยัน} (0.6451 vs 0.6402, McNemar $p = 10^{-7}$) \\
-$H_2$ & XLM-R-large $\geq$ monolingual Thai LMs & \textbf{ปฏิเสธ} (0.5450 ต่ำสุดในกลุ่ม) \\
-$H_3$ & Stacking $>$ best single & \textbf{ยืนยัน} (0.6914 vs 0.6728, McNemar $p = 6.9\!\times\!10^{-53}$) \\
-$H_4$ & รูปแบบความผิดพลาดของ encoders ต่างกัน & \textbf{ยืนยัน} (Cochran's Q $p = 9\!\times\!10^{-134}$) \\
+$H_1$ & PhayaThaiBERT $>$ WangchanBERTa & \textbf{ยืนยัน} (0.6451 vs 0.6402, $p=10^{-7}$) \\
+$H_2$ & XLM-R-large $\geq$ monolingual Thai LMs & \textbf{ปฏิเสธ} (0.5450 ต่ำสุด) \\
+$H_3$ & Stacking $>$ best single & \textbf{ยืนยัน} (0.6914 vs 0.6728, $p=6.9{\times}10^{-53}$) \\
+$H_4$ & รูปแบบความผิดพลาดของ encoders ต่างกัน & \textbf{ยืนยัน} ($p=9{\times}10^{-134}$) \\
 \bottomrule
 \end{tabularx}
 \end{table}

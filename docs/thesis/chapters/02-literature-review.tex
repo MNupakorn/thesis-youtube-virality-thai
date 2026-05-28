@@ -307,9 +307,9 @@ A ผิด & $n_{10}$ & $n_{11}$
 \chi^2_{\mathrm{McNemar}} = \frac{(n_{01} - n_{10})^2}{n_{01} + n_{10}}
 \label{eq:mcnemar}
 \end{equation}
-ภายใต้ $H_0$: แบบจำลอง 2 ตัวมีอัตราความผิดพลาดเท่ากัน สถิติเข้าใกล้ $\chi^2_1$
-\textcite{dietterich1998approximate} แนะนำการทดสอบนี้สำหรับการเปรียบเทียบ
-2 ตัวจำแนก
+ภายใต้ $H_0$ ที่ว่าแบบจำลอง 2 ตัวมีอัตราความผิดพลาดเท่ากัน สถิติเข้าใกล้
+การแจกแจง $\chi^2_1$ \textcite{dietterich1998approximate}
+แนะนำการทดสอบนี้สำหรับการเปรียบเทียบ 2 ตัวจำแนก
 
 \subsection{Cochran's Q Test}
 
@@ -366,7 +366,8 @@ residual:
 \mathrm{Rollout}^{(L)} = \prod_{l=1}^{L} \tilde A^{(l)}
 \label{eq:attnroll}
 \end{equation}
-ผลลัพธ์คือ ``ความสนใจรวม'' ของแต่ละ token ที่มีต่อการพยากรณ์สุดท้าย \textcite{chefer2021transformer} ขยายแนวคิดนี้ด้วย gradient-weighted
+ผลลัพธ์คือ ``ความสนใจรวม'' ของแต่ละ token ที่มีต่อการพยากรณ์สุดท้าย
+\textcite{chefer2021transformer} ขยายแนวคิดนี้ด้วย gradient-weighted
 relevance propagation งานวิจัยปัจจุบันใช้ rollout แบบ Abnar \& Zuidema เพราะ
 เป็น baseline ที่ใช้แพร่หลายและไม่ต้อง backprop
 

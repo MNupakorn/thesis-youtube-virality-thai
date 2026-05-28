@@ -12,7 +12,8 @@
 $p$-value สำหรับทุกคู่ของแบบจำลอง 22 ตัว (เลือกแสดงเฉพาะคู่ที่มี $p < 10^{-30}$)
 แหล่งที่มา: \texttt{reports/tables/mcnemar\_pairwise.csv}
 
-\begin{longtable}{p{5cm}p{5cm}rl}
+\begingroup\footnotesize
+\begin{longtable}{p{4.5cm}p{4.5cm}rl}
 \caption{Pairwise McNemar's test (selected pairs)}
 \label{tab:mcnemar-full} \\
 \toprule
@@ -31,6 +32,7 @@ wangchanberta            & xlm-roberta-large          & 314.02 & $2.9\!\times\!1
 phayathaibert            & wangchanberta              & 28.31  & $1.0\!\times\!10^{-7}$ \\
 \bottomrule
 \end{longtable}
+\endgroup
 
 \section{Drop-One Stacking Ablation (เต็ม)}
 \label{app:drop-one-full}
