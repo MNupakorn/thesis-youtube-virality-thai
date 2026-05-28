@@ -55,18 +55,30 @@
 \renewcommand\Huge{\fontsize{28pt}{34pt}\selectfont}
 \normalsize
 
-% ── Thai line breaking ────────────────────────────────────
+% ── Thai line breaking & justification ───────────────────
+% ใช้ ICU Thai locale ตัดคำ + คุม spacing ให้สมดุล
+% ค่า skip / tolerance / emergencystretch ปรับใหม่จากค่าเดิมที่ทำให้
+% (ก) วรรคคำห่างเกิน (tolerance สูง + stretch กว้าง)
+% (ข) ตัวอักษรตกบรรทัด (sloppy ไม่พอ)
 \XeTeXlinebreaklocale "th"
-\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
-\tolerance=2000
-\emergencystretch=3em
-\hyphenpenalty=5000
-\exhyphenpenalty=5000
+\XeTeXlinebreakskip = 0pt plus 0.4pt minus 0.4pt
+\XeTeXlinebreakpenalty = 50
+\tolerance=1500
+\emergencystretch=1.5em
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\linepenalty=200
+\hbadness=2500       % ลด warning เกี่ยวกับ underfull lines
+
+% ── Paragraph indent (ตามขนบไทย ~1 ซม.) ─────────────────
+\setlength{\parindent}{1cm}
+\setlength{\parskip}{0pt}
 
 % ── Page geometry (1.5" left, 1" others ตามคู่มือ STAT) ─────
 \usepackage[a4paper,top=1in,bottom=1in,left=1.5in,right=1in,headheight=14.5pt,headsep=12pt]{geometry}
 \usepackage{setspace}
 \onehalfspacing
+\frenchspacing       % ป้องกันช่องว่างพิเศษหลัง . (ทำให้ไทยดูแปลก)
 
 % ── Math / tables / graphics ─────────────────────────
 \usepackage{amsmath,amssymb,amsthm}
@@ -150,14 +162,27 @@
 \newcommand{\arabicpagenumbering}{\renewcommand{\thepage}{\arabic{page}}}
 \makeatother
 
-% ── TOC: dots ติดกัน + เพิ่ม "หน้า" header ────────────────
+% ── TOC / LoF / LoT: dot leaders + ขยายช่องเลขให้ตรงคอลัมน์ ──
 \usepackage{tocloft}
 \renewcommand{\cftdotsep}{0.5}        % จุดถี่กว่าค่าเริ่มต้น
+% Chapters in TOC
 \renewcommand{\cftchapdotsep}{\cftdotsep}
 \renewcommand{\cftchapleader}{\cftdotfill{\cftchapdotsep}}
 \renewcommand{\cftchapfont}{\bfseries}
 \renewcommand{\cftchappagefont}{\bfseries}
 \setlength{\cftbeforechapskip}{4pt}
+% Figures in LoF — ขยายช่องเลขเป็น 3em รองรับ "ภาพที่ X.YY"
+\renewcommand{\cftfigpresnum}{ภาพที่~}
+\renewcommand{\cftfigaftersnum}{:}
+\setlength{\cftfignumwidth}{4.2em}
+\renewcommand{\cftfigleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforefigskip}{2pt}
+% Tables in LoT — เช่นเดียวกับ figures
+\renewcommand{\cfttabpresnum}{ตารางที่~}
+\renewcommand{\cfttabaftersnum}{:}
+\setlength{\cfttabnumwidth}{4.4em}
+\renewcommand{\cfttableader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforetabskip}{2pt}
 
 % ── Captions: ภาพที่/ตารางที่ ตามคู่มือ ─────────────────
 \addto\captionsthai{%
