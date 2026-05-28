@@ -375,7 +375,7 @@
 \section{ข้อมูล}
 % =====================================================================
 
-\begin{frame}{4.1 การเก็บรวบรวมข้อมูล (Data Collection)}
+\begin{frame}[shrink=8]{4.1 การเก็บรวบรวมข้อมูล (Data Collection)}
   \begin{block}{แหล่งข้อมูล}
     YouTube Data API v3 (public, free tier 10{,}000 quota units/day)
   \end{block}
@@ -524,7 +524,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{5.2 Structural Features (27 ตัว)}
+\begin{frame}[shrink=8]{5.2 Structural Features (27 ตัว)}
   \footnotesize
   \begin{columns}[T]
     \column{0.5\textwidth}
@@ -570,7 +570,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{5.3 Transformer Fine-tuning Procedure}
+\begin{frame}[shrink=20]{5.3 Transformer Fine-tuning Procedure}
   \textbf{Shared Trainer Wrapper} (\texttt{src/models/transformer\_finetune.py}):
   \begin{itemize}
     \item Hugging Face \texttt{Trainer} (transformers v5)
@@ -600,7 +600,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{5.4 Cloud GPU Strategy — Hugging Face Jobs}
+\begin{frame}[shrink=20]{5.4 Cloud GPU Strategy — Hugging Face Jobs}
   \textbf{ทำไมต้องใช้ cloud GPU?}
   \begin{itemize}
     \item Apple M1 (MPS): PhayaThaiBERT OOM ที่ 9 GB pool, fp16/bf16 ให้ NaN
@@ -628,7 +628,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{5.5 Imbalance Handling — \emph{train-only}}
+\begin{frame}[shrink=5]{5.5 Imbalance Handling — \emph{train-only}}
   \begin{block}{หลักการ}
     Val/test \hl{ห้ามแตะ} (อยู่ที่ natural $\sim$9\% positive)\\
     Train เท่านั้นที่ปรับ class distribution
@@ -650,7 +650,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{5.6 Stacking Ensemble (15 base models)}
+\begin{frame}[shrink=8]{5.6 Stacking Ensemble (15 base models)}
   \begin{columns}[T]
     \column{0.55\textwidth}
     \scriptsize
@@ -785,7 +785,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{7.2 Leaderboard — Top 10 Models}
+\begin{frame}[shrink=5]{7.2 Leaderboard — Top 10 Models}
   \footnotesize
   \begin{tabular}{rlrr}
     \toprule
@@ -812,7 +812,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{7.3 ROC + PR Curves (Test Set)}
+\begin{frame}[shrink=5]{7.3 ROC + PR Curves (Test Set)}
   \begin{center}
     \includegraphics[width=0.95\textwidth]{figures/roc_pr_test.png}
   \end{center}
@@ -871,7 +871,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{7.6 Calibration Results}
+\begin{frame}[shrink=25]{7.6 Calibration Results}
   \begin{columns}[T]
     \column{0.55\textwidth}
     \includegraphics[width=\textwidth]{figures/calibration_top_model.png}
@@ -899,7 +899,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{7.7 Reliability Diagram (Stacking)}
+\begin{frame}[shrink=30]{7.7 Reliability Diagram (Stacking)}
   \begin{center}
     \includegraphics[width=0.55\textwidth]{figures/reliability_stacking.png}
   \end{center}
@@ -967,7 +967,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{8.4 5-fold GroupKFold Robustness}
+\begin{frame}[shrink=10]{8.4 5-fold GroupKFold Robustness}
   \textbf{ทำไมต้องทำ K-fold?}
   \begin{itemize}
     \item ป้องกัน headline 0.6914 เป็น artefact จากการแบ่งครั้งเดียว
@@ -1041,7 +1041,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{9.3 LIME — Local Explanation (ตัวอย่างจริง)}
+\begin{frame}[shrink=5]{9.3 LIME — Local Explanation (ตัวอย่างจริง)}
   \footnotesize
   \textbf{วิดีโอ:} \texttt{<\texttt{video\_id} ถูกซ่อนไว้ตามนโยบาย privacy>}
   \begin{itemize}
@@ -1258,7 +1258,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{11.2 Implications สำหรับ Practice}
+\begin{frame}[shrink=8]{11.2 Implications สำหรับ Practice}
   \textbf{สำหรับ Content Creator:}
   \begin{itemize}
     \item ลงทุนกับการตั้ง \hl{title} มากกว่า description (ROI สูงกว่ามาก)
